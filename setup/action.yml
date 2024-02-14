@@ -15,8 +15,7 @@ runs:
       shell: bash
     - name: Install Typst for PDF builds
       uses: typst-community/setup-typst@v3
-    - name: Install imagemagick, inkscape, and webp
+    - name: Install image transformation utilities
       shell: bash
       run: |
-        sudo apt-get update
         sudo apt-get install -y inkscape imagemagick webp
