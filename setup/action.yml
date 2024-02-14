@@ -1,0 +1,16 @@
+name: Setup Curvenote
+description: A GitHub action to setup the Curvenote CLI
+author: 'Rowan Cockett'
+branding:
+  icon: 'package'
+  color: 'blue'
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    - name: Install Curvenote
+      run: npm install -g curvenote
+    - name: Install Typst for PDF builds
+      uses: typst-community/setup-typst@v3
