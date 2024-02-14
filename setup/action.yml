@@ -12,5 +12,6 @@ runs:
         node-version: 20.x
     - name: Install Curvenote
       run: npm install -g curvenote
+      shell: bash
     - name: Install Typst for PDF builds
       uses: typst-community/setup-typst@v3
