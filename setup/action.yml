@@ -1,11 +1,18 @@
 name: Setup Curvenote
 description: A GitHub action to setup the Curvenote CLI
-author: 'Rowan Cockett'
+author: Curvenote Inc.
 branding:
-  icon: 'package'
-  color: 'blue'
+  icon: package
+  color: blue
+inputs:
+  typst:
+    description: Install typst for PDF rendering
+    default: 'true'
+  images:
+    description: Install image transformation tools
+    default: 'true'
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - uses: actions/setup-node@v4
       with:
@@ -14,8 +21,10 @@ runs:
       run: npm install -g curvenote
       shell: bash
     - name: Install Typst for PDF builds
+      if: ${{ inputs.typst == 'true'}}
       uses: typst-community/setup-typst@v3
     - name: Install image transformation utilities
+      if: ${{ inputs.images == 'true'}}
       shell: bash
       run: |
         sudo apt-get install -y inkscape imagemagick webp
