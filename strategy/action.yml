@@ -1,0 +1,74 @@
+name: Curvenote - Deployment Strategy
+description: A GitHub action to choose how to check, preview and publish articles
+author: Curvenote Inc.
+branding:
+  icon: package
+  color: blue
+inputs:
+  monorepo:
+    description: |
+      Indicate that this repository contains multiple projects that should be published.
+
+      For example, if you have multiple articles, or tutorials that should be previewed
+      and submitted when there are changes in the repository.
+    required: false
+    default: false
+  path:
+    description: |
+      The root directory path(s) where the Curvenote CLI will be invoked.
+      If `multiple` paths are being used, separate the `path` string with ';'.
+      The paths can also be glob patterns, for example:
+
+      ```yaml
+      path: my/project
+      path: my/paper; my/poster
+      path: papers/*; posters/*
+      ```
+
+      The default path is the root of the repository.
+    required: false
+    default: '.'
+  enforceSingleFolder:
+    description: |
+      When true, an error will be raised if a pull-request is touching multiple
+      different folders. This can either be `true` or a label string.
+      Multiple labels can be added with comma-separated values.
+
+      If labels are used to control this property, the pull request will only fail in
+      PRs with these labels.
+
+      This can be used in conjunction with the `previewLabel`, for example, if they
+      are both `paper` then the PRs with those labels will be required to only make changes
+      in a single folder and will not be previewed if that condition fails.
+      However, you can add additional preview labels, e.g. `all-papers`, which will build
+      previews for all papers, as the single folder condition is not enforced for that label.
+    required: false
+    default: false
+  previewLabel:
+    description: |
+      A pull-request label that indicates the preview and checks should be run.
+      Multiple labels can be added with comma-separated values.
+
+      If no label is supplied, the preview will run on all PRs.
+    required: false
+  submitLabel:
+    description: |
+      A pull-request label that indicates the branch should be turned into a submission.
+      This will notify all curators of the Curvenote site.
+
+      The submission identifiers will be written directly to the repository in a commit,
+      and the submission will be available to be merged on the Curvenote platform.
+
+      A submission will not happen unless both the `enforceSingleFolder` and `previewLabel`
+      conditions are satisfied.
+    required: false
+    default: ready
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+outputs:
+  published:
+    description: A boolean value to indicate whether a publishing is happened or not
+  publishedPackages:
+    description: >
+      A JSON array to present the published packages. The format is `[{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]`
