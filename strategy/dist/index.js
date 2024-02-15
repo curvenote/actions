@@ -27728,7 +27728,7 @@ const getMergeDiff = async (branch) => {
     }
     // Use the merge base to list changes
     const mergeBase = mergeBaseResult.stdout.trim();
-    const diffResult = await (0,exec.getExecOutput)('git', ['diff', '--name-only', mergeBase, 'FETCH_HEAD'], {
+    const diffResult = await (0,exec.getExecOutput)('git', ['--no-pager', 'diff', '--name-only', 'FETCH_HEAD', mergeBase], {
         ignoreReturnCode: true,
     });
     if (diffResult.stderr) {
