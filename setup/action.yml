@@ -1,5 +1,5 @@
 name: Setup Curvenote
-description: A GitHub action to setup the Curvenote CLI
+description: Setup the Curvenote CLI
 author: Curvenote Inc.
 branding:
   icon: package
@@ -21,10 +21,10 @@ runs:
       run: npm install -g curvenote
       shell: bash
     - name: Install Typst for PDF builds
-      if: ${{ inputs.typst == 'true'}}
+      if: ${{ inputs.typst == 'true' }}
       uses: typst-community/setup-typst@v3
     - name: Install image transformation utilities
-      if: ${{ inputs.images == 'true'}}
+      if: ${{ inputs.images == 'true' }}
       shell: bash
       run: |
         sudo apt-get install -y inkscape imagemagick webp
