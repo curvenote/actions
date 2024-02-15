@@ -27752,7 +27752,7 @@ const getChangedFiles = async (baseBranch) => {
         'diff',
         '--name-only',
         baseBranch,
-        'FETCH_HEAD',
+        process.env.GITHUB_HEAD_REF,
     ]);
     if (stderr) {
         console.error('Error getting changed files:', stderr);
