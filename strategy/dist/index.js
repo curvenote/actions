@@ -27738,28 +27738,46 @@ const getMergeDiff = async (branch) => {
     console.log('Changed files:', diffResult.stdout);
     return diffResult.stdout;
 };
-const getChangedFiles = async (baseBranch) => {
-    // Fetch the base branch to ensure it's available for comparison
-    await (0,exec.getExecOutput)('git', [
-        'fetch',
-        '--no-tags',
-        '--depth=1',
-        'origin',
-        `${baseBranch}:${baseBranch}`,
-    ]);
-    // Get the list of changed files between the base branch and the PR's head
+// export const getChangedFiles = async (baseBranch: string): Promise<string[]> => {
+//   // Fetch the base branch to ensure it's available for comparison
+//   await getExecOutput('git', [
+//     'fetch',
+//     '--no-tags',
+//     '--depth=1',
+//     'origin',
+//     `${baseBranch}:${baseBranch}`,
+//   ]);
+//   // Get the list of changed files between the base branch and the PR's head
+//   const { stdout, stderr } = await getExecOutput('git', [
+//     'diff',
+//     '--name-only',
+//     baseBranch,
+//     process.env.GITHUB_HEAD_REF as string,
+//   ]);
+//   if (stderr) {
+//     console.error('Error getting changed files:', stderr);
+//     throw new Error(`Failed to get changed files: ${stderr}`);
+//   }
+//   // Split the stdout by newline to get an array of changed files
+//   const changedFiles = stdout.split('\n').filter((file) => file); // Remove any empty lines
+//   console.log('Changed Files:', changedFiles);
+//   return changedFiles;
+// };
+const getChangedFiles = async () => {
+    // Use environment variables to dynamically refer to branches
+    const baseBranch = 'origin/main';
+    const headBranch = `origin/${process.env.GITHUB_HEAD_REF}`;
     const { stdout, stderr } = await (0,exec.getExecOutput)('git', [
         'diff',
         '--name-only',
         baseBranch,
-        process.env.GITHUB_HEAD_REF,
+        headBranch,
     ]);
     if (stderr) {
         console.error('Error getting changed files:', stderr);
         throw new Error(`Failed to get changed files: ${stderr}`);
     }
-    // Split the stdout by newline to get an array of changed files
-    const changedFiles = stdout.split('\n').filter((file) => file); // Remove any empty lines
+    const changedFiles = stdout.split('\n').filter((file) => file);
     console.log('Changed Files:', changedFiles);
     return changedFiles;
 };
@@ -27777,7 +27795,7 @@ const getChangedFiles = async (baseBranch) => {
     core.setOutput('published', 'false');
     core.setOutput('publishedPackages', '[]');
     await getMergeDiff('main');
-    await getChangedFiles('main');
+    await getChangedFiles();
 })().catch((err) => {
     core.error(err);
     core.setFailed(err.message);
