@@ -27700,16 +27700,43 @@ var core = __nccwpck_require__(2186);
 var exec = __nccwpck_require__(1514);
 ;// CONCATENATED MODULE: ./src/gitUtils.ts
 
+// export const getMergeDiff = async (branch: string) => {
+//   let { stderr } = await getExecOutput('git', ['merge-base', 'FETCH_HEAD', branch], {
+//     ignoreReturnCode: true,
+//   });
+//   console.log(stderr);
+//   let { stderr: out } = await getExecOutput(
+//     'git',
+//     ['--no-pager', 'diff', '--name-only', 'FETCH_HEAD', stderr],
+//     {
+//       ignoreReturnCode: true,
+//     }
+//   );
+//   console.log(out);
+//   return out;
+// };
 const getMergeDiff = async (branch) => {
-    let { stderr } = await (0,exec.getExecOutput)('git', ['merge-base', 'FETCH_HEAD', branch], {
+    // Ensure the target branch is fully qualified e.g., refs/remotes/origin/main
+    const qualifiedBranch = `refs/remotes/origin/${branch}`;
+    // Find the merge-base between FETCH_HEAD (the head of the PR) and the target branch
+    const mergeBaseResult = await (0,exec.getExecOutput)('git', ['merge-base', 'FETCH_HEAD', qualifiedBranch], {
         ignoreReturnCode: true,
     });
-    console.log(stderr);
-    let { stderr: out } = await (0,exec.getExecOutput)('git', ['--no-pager', 'diff', '--name-only', 'FETCH_HEAD', stderr], {
+    if (mergeBaseResult.stderr) {
+        console.error('Error finding merge base:', mergeBaseResult.stderr);
+        return ''; // or handle error more gracefully
+    }
+    // Use the merge base to list changes
+    const mergeBase = mergeBaseResult.stdout.trim();
+    const diffResult = await (0,exec.getExecOutput)('git', ['--no-pager', 'diff', '--name-only', mergeBase, 'FETCH_HEAD'], {
         ignoreReturnCode: true,
     });
-    console.log(out);
-    return out;
+    if (diffResult.stderr) {
+        console.error('Error listing changes:', diffResult.stderr);
+        return ''; // or handle error more gracefully
+    }
+    console.log('Changed files:', diffResult.stdout);
+    return diffResult.stdout;
 };
 
 ;// CONCATENATED MODULE: ./src/index.ts
