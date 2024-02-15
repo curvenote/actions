@@ -27776,8 +27776,8 @@ const getChangedFiles = async (baseBranch) => {
     core.info('Hello there!');
     core.setOutput('published', 'false');
     core.setOutput('publishedPackages', '[]');
-    getMergeDiff('main');
-    getChangedFiles('main');
+    await getMergeDiff('main');
+    await getChangedFiles('main');
 })().catch((err) => {
     core.error(err);
     core.setFailed(err.message);
