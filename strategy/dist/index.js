@@ -27765,8 +27765,8 @@ const getMergeDiff = async (branch) => {
 // };
 const getChangedFiles = async () => {
     // Use environment variables to dynamically refer to branches
-    const baseBranch = process.env.GITHUB_BASE_REF;
-    const headBranch = process.env.GITHUB_HEAD_REF;
+    const baseBranch = `origin/${process.env.GITHUB_BASE_REF}`;
+    const headBranch = `origin/${process.env.GITHUB_HEAD_REF}`;
     // git fetch origin ${GITHUB_BASE_REF}:refs/remotes/origin/${GITHUB_BASE_REF}
     // git fetch origin ${GITHUB_HEAD_REF}:refs/remotes/origin/${GITHUB_HEAD_REF}
     await (0,exec.getExecOutput)('git', [
@@ -27774,14 +27774,14 @@ const getChangedFiles = async () => {
         '--no-tags',
         '--depth=1',
         'origin',
-        `${baseBranch}:refs/remotes/origin/${baseBranch}`,
+        `${process.env.GITHUB_BASE_REF}:refs/remotes/${baseBranch}`,
     ]);
     await (0,exec.getExecOutput)('git', [
         'fetch',
         '--no-tags',
         '--depth=1',
         'origin',
-        `${headBranch}:refs/remotes/origin/${headBranch}`,
+        `${process.env.GITHUB_HEAD_REF}:refs/remotes/${headBranch}`,
     ]);
     const { stdout, stderr } = await (0,exec.getExecOutput)('git', [
         'diff',
