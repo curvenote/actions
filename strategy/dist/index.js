@@ -26485,11 +26485,12 @@ var __webpack_exports__ = {};
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
 
 (async () => {
-    let githubToken = process.env.GITHUB_TOKEN;
-    if (!githubToken) {
-        _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed('Please add the GITHUB_TOKEN to the changesets action');
-        return;
-    }
+    // let githubToken = process.env.GITHUB_TOKEN;
+    // if (!githubToken) {
+    //   core.setFailed('Please add the GITHUB_TOKEN to the changesets action');
+    //   return;
+    // }
+    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info('Hello there!');
     _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('published', 'false');
     _actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput('publishedPackages', '[]');
     // core.setOutput('hasChangesets', String(hasChangesets));
