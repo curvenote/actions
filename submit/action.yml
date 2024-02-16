@@ -29,9 +29,8 @@ runs:
         else
           curvenote submit ${{ inputs.venue }} --kind ${{ inputs.kind }} -y
         fi
-    - name: Upload Curvenote Submit Log
+    - name: Upload Curvenote Logs
       uses: actions/upload-artifact@v3
-      working-directory: ${{ inputs.working-directory }}
       with:
         name: submit-${{ inputs.working-directory }}
-        path: _build/logs/curvenote.submit.json
+        path: ${{ inputs.working-directory }}/_build/logs
