@@ -69,6 +69,23 @@ runs:
 outputs:
   published:
     description: A boolean value to indicate whether a publishing is happened or not
-  publishedPackages:
+  matrix:
     description: >
-      A JSON array to present the published packages. The format is `[{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]`
+      A JSON object describing the build matrix, this can be used to inform other build steps.
+
+      Each step will include:
+
+      - `working-directory`: The directory that the step should complete in.
+
+      To use the strategy matrix, run the step, then include the matrix from JSON:
+
+      ```yaml
+      needs: strategy
+      runs-on: ubuntu-latest
+      strategy:
+        matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
+      steps:
+        - shell: bash
+          run: |
+            echo "Working in directory ${{ matrix.working-directory }}"
+      ```

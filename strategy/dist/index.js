@@ -32030,27 +32030,21 @@ const getChangedFiles = async () => {
         '--depth=1',
         'origin',
         `${process.env.GITHUB_BASE_REF}:refs/remotes/${baseBranch}`,
-    ]);
+    ], { silent: true });
     await (0,exec.getExecOutput)('git', [
         'fetch',
         '--no-tags',
         '--depth=1',
         'origin',
         `${process.env.GITHUB_HEAD_REF}:refs/remotes/${headBranch}`,
-    ]);
+    ], { silent: true });
     // Compare the branches, and get the filename diff
-    const { stdout, stderr } = await (0,exec.getExecOutput)('git', [
-        'diff',
-        '--name-only',
-        baseBranch,
-        headBranch,
-    ]);
+    const { stdout, stderr } = await (0,exec.getExecOutput)('git', ['diff', '--name-only', baseBranch, headBranch], { silent: true });
     if (stderr) {
         console.error('Error getting changed files:', stderr);
         throw new Error(`Failed to get changed files: ${stderr}`);
     }
     const changedFiles = stdout.split('\n').filter((file) => file);
-    console.log('Changed Files:', changedFiles);
     return changedFiles;
 };
 
@@ -32114,9 +32108,10 @@ function booleanOrLabels(value) {
     const previewLabel = booleanOrLabels(core.getInput('previewLabel'));
     const submitLabel = booleanOrLabels(core.getInput('previewLabel'));
     const changedFiles = await getChangedFiles();
-    const prLabels = getPullRequestLabels(octokit);
+    const prLabels = await getPullRequestLabels(octokit);
     console.log({ enforceSingleFolder, previewLabel, submitLabel, changedFiles, prLabels });
     // if (enforceSingleFolder && );
+    core.setOutput('matrix', JSON.stringify({ include: paths.map((p) => ({ 'working-directory': p })) }));
     core.setOutput('published', 'false');
     core.setOutput('publishedPackages', '[]');
 })().catch((err) => {
