@@ -16,13 +16,13 @@ inputs:
   path:
     description: |
       The root directory path(s) where the Curvenote CLI will be invoked.
-      If `multiple` paths are being used, separate the `path` string with ';'.
-      The paths can also be glob patterns, for example:
+      If `multiple` paths are being used, separate the `path` string with ','.
+      The paths can also be glob-like patterns (but only one `*`), for example:
 
       ```yaml
       path: my/project
-      path: my/paper; my/poster
-      path: papers/*; posters/*
+      path: my/paper, my/poster
+      path: papers/*, posters/*
       ```
 
       The default path is the root of the repository.

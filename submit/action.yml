@@ -8,9 +8,6 @@ inputs:
   working-directory:
     description: Install typst for PDF rendering
     required: true
-  CURVENOTE_TOKEN:
-    description: Curvenote token for authentication
-    required: true
   venue:
     description: 'The site or venue that this project is being submitted to'
     required: true
@@ -25,8 +22,6 @@ runs:
   steps:
     - name: Submit project to Curvenote
       working-directory: ${{ inputs.working-directory }}
-      env:
-        CURVENOTE_TOKEN: ${{ inputs.CURVENOTE_TOKEN }}
       shell: bash
       run: |
         if [ "${{ inputs.draft }}" = "true" ]; then

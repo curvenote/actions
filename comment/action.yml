@@ -1,0 +1,38 @@
+name: Comment based on build results
+description: Add a comment to the PR
+author: Curvenote Inc.
+branding:
+  icon: package
+  color: blue
+inputs:
+  build-urls:
+    description: URLs for the build status
+runs:
+  using: composite
+  steps:
+    - name: Find Comment
+      uses: peter-evans/find-comment@v3
+      id: fc
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: Curvenote Preview
+    - name: Create comment
+      if: steps.fc.outputs.comment-id == ''
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          **Curvenote Preview** 🚀
+
+          ${{ inputs.build-urls }}
+    - name: Update comment
+      if: steps.fc.outputs.comment-id != ''
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          **Curvenote Preview** 🚀
+
+          ${{ inputs.build-urls }}
