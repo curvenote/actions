@@ -1,5 +1,5 @@
-name: Submit Curvenote
-description: Submit a project to a Curvenote site or journal
+name: Curvenote Preview or Submit
+description: Preview or submit a project to a Curvenote site
 author: Curvenote Inc.
 branding:
   icon: package
@@ -30,7 +30,7 @@ runs:
           curvenote submit ${{ inputs.venue }} --kind ${{ inputs.kind }} -y
         fi
     - name: Upload Curvenote Logs
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: submit-${{ inputs.working-directory }}
         path: ${{ inputs.working-directory }}/_build/logs
