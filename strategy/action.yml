@@ -75,4 +75,5 @@ outputs:
 
       Each step will include:
 
+      - `index`: The index of the job
       - `working-directory`: The directory that the step should complete in.

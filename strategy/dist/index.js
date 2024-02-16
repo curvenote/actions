@@ -32099,14 +32099,16 @@ function booleanOrLabels(value) {
     }
     const octokit = new dist_node.Octokit({ auth: githubToken });
     const monorepo = core.getInput('monorepo') === 'true';
-    const paths = core.getInput('path').split(',');
+    const paths = core.getInput('path')
+        .split(',')
+        .map((p) => p.trim());
     if (monorepo && (paths.length !== 1 || paths[0].includes('*'))) {
         core.setFailed('Cannot include multiple paths if the strategy is not a monorepo.\n\nEither set `monorepo: true` or set a single path (without glob patterns).');
         return;
     }
     const enforceSingleFolder = booleanOrLabels(core.getInput('enforceSingleFolder'));
     const previewLabel = booleanOrLabels(core.getInput('previewLabel'));
-    const submitLabel = booleanOrLabels(core.getInput('previewLabel'));
+    const submitLabel = booleanOrLabels(core.getInput('submitLabel'));
     const changedFiles = await getChangedFiles();
     const prLabels = await getPullRequestLabels(octokit);
     console.log({ enforceSingleFolder, previewLabel, submitLabel, changedFiles, prLabels });
