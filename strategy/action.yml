@@ -76,16 +76,3 @@ outputs:
       Each step will include:
 
       - `working-directory`: The directory that the step should complete in.
-
-      To use the strategy matrix, run the step, then include the matrix from JSON:
-
-      ```yaml
-      needs: strategy
-      runs-on: ubuntu-latest
-      strategy:
-        matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
-      steps:
-        - shell: bash
-          run: |
-            echo "Working in directory ${{ matrix.working-directory }}"
-      ```
