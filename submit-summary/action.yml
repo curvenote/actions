@@ -5,8 +5,9 @@ branding:
   icon: package
   color: blue
 inputs:
-  matrix: The build matrix created in the strategy step (JSON)
-  required: true
+  matrix:
+    description: The build matrix created in the strategy step (JSON)
+    required: true
 runs:
   using: 'node20'
   main: 'dist/index.js'
