@@ -5,8 +5,12 @@ branding:
   icon: package
   color: blue
 inputs:
-  build-urls:
-    description: URLs for the build status
+  title:
+    description: The title of the comment, put in bold at the top and ensures that the correct comment is updated
+    default: Curvenote Preview
+  comment:
+    description: The body of the comment, in markdown
+    required: true
 runs:
   using: composite
   steps:
@@ -16,16 +20,16 @@ runs:
       with:
         issue-number: ${{ github.event.pull_request.number }}
         comment-author: 'github-actions[bot]'
-        body-includes: Curvenote Preview
+        body-includes: ${{ inputs.title }}
     - name: Create comment
       if: steps.fc.outputs.comment-id == ''
       uses: peter-evans/create-or-update-comment@v4
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
-          **Curvenote Preview** 🚀
+          **${{ inputs.title }}**
 
-          ${{ inputs.build-urls }}
+          ${{ inputs.comment }}
     - name: Update comment
       if: steps.fc.outputs.comment-id != ''
       uses: peter-evans/create-or-update-comment@v4
@@ -33,6 +37,6 @@ runs:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         edit-mode: replace
         body: |
-          **Curvenote Preview** 🚀
+          **${{ inputs.title }}**
 
-          ${{ inputs.build-urls }}
+          ${{ inputs.comment }}
