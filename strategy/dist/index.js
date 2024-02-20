@@ -32232,7 +32232,7 @@ There are changes in:
     });
     // Set the build matrix
     core.setOutput('matrix', JSON.stringify({
-        include: filteredPaths.map((p, i) => ({ index: i, 'working-directory': p })),
+        include: filteredPaths.map((p, i) => ({ id: String(i), 'working-directory': p })),
     }));
     core.setOutput('published', 'false');
     core.setOutput('publishedPackages', '[]');
