@@ -75,5 +75,5 @@ outputs:
 
       Each step will include:
 
-      - `index`: The index of the job
+      - `id`: The local identifier for the submission job (only used between github actions)
       - `working-directory`: The directory that the step should complete in.
