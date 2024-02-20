@@ -32193,7 +32193,7 @@ function filterPathsAndIdentifyUnknownChanges(paths, changedFiles) {
     const octokit = new dist_node.Octokit({ auth: githubToken });
     const monorepo = core.getInput('monorepo') === 'true';
     const paths = await resolvePaths(process.cwd(), core.getInput('path'));
-    if (monorepo && paths.length !== 1) {
+    if (!monorepo && paths.length !== 1) {
         core.setFailed('Cannot include multiple paths if the strategy is not a monorepo.\n\nEither set `monorepo: true` or set a single path (without glob-like patterns).');
         return;
     }
