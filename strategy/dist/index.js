@@ -32220,6 +32220,16 @@ There are changes in:
   - ${unknownChangedFiles.join('\n  - ')}`);
         return;
     }
+    console.log({
+        monorepo,
+        enforceSingleFolder,
+        paths,
+        changedFiles,
+        filteredPaths,
+        unknownChangedFiles,
+        previewLabel,
+        submitLabel,
+    });
     // Set the build matrix
     core.setOutput('matrix', JSON.stringify({
         include: filteredPaths.map((p, i) => ({ index: i, 'working-directory': p })),
