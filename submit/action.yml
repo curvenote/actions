@@ -12,14 +12,14 @@ inputs:
     description: Install typst for PDF rendering
     required: true
   venue:
-    description: 'The site or venue that this project is being submitted to'
+    description: The site or venue that this project is being submitted to
     required: true
   kind:
-    description: 'The kind of the submission'
+    description: The kind of the submission
     required: true
   draft:
-    description: 'Flag to indicate if the submission should be a draft'
-    default: 'false'
+    description: Flag to indicate if the submission should be a draft
+    default: false
 runs:
   using: composite
   steps:

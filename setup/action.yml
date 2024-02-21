@@ -26,6 +26,7 @@ runs:
     - name: Install image transformation utilities
       if: ${{ inputs.images == 'true' }}
       shell: bash
+      # This installs image conversions as well as patches to allow PDF -> PNG conversions
       run: |
         sudo apt-get install -y inkscape imagemagick webp ghostscript
         sudo sed -i '/domain="coder" rights="none"/d' /etc/ImageMagick-6/policy.xml
