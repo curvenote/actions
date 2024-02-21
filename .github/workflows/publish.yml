@@ -5,9 +5,11 @@ on:
       venue:
         description: The site or venue that this project is being submitted to
         required: true
+        type: boolean
       kind:
         description: The kind of the submission
         required: true
+        type: boolean
       monorepo:
         description: |
           Indicate that this repository contains multiple projects that should be published.
@@ -16,6 +18,7 @@ on:
           and submitted when there are changes in the repository.
         required: false
         default: false
+        type: boolean
       path:
         description: |
           The root directory path(s) where the Curvenote CLI will be invoked.
@@ -31,6 +34,7 @@ on:
           The default path is the root of the repository.
         required: false
         default: '.'
+        type: string
       enforceSingleFolder:
         description: |
           When true, an error will be raised if a pull-request is touching multiple
@@ -46,7 +50,8 @@ on:
           However, you can add additional preview labels, e.g. `all-papers`, which will build
           previews for all papers, as the single folder condition is not enforced for that label.
         required: false
-        default: false
+        default: 'false'
+        type: string
       previewLabel:
         description: |
           A pull-request label that indicates the preview and checks should be run.
@@ -54,6 +59,7 @@ on:
 
           If no label is supplied, the preview will run on all PRs.
         required: false
+        type: string
       submitLabel:
         description: |
           A pull-request label that indicates the branch should be turned into a submission.
@@ -66,6 +72,7 @@ on:
           conditions are satisfied.
         required: false
         default: ready
+        type: string
     secrets:
       CURVENOTE_TOKEN:
         description: Curvenote API token
