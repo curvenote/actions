@@ -27,4 +27,5 @@ runs:
       if: ${{ inputs.images == 'true' }}
       shell: bash
       run: |
-        sudo apt-get install -y inkscape imagemagick webp
+        sudo apt-get install -y inkscape imagemagick webp ghostscript
+        sudo sed -i '/domain="coder" rights="none"/d' /etc/ImageMagick-6/policy.xml
