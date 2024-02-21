@@ -77,8 +77,6 @@ on:
       CURVENOTE_TOKEN:
         description: Curvenote API token
         required: true
-      GITHUB_TOKEN:
-        required: true
 permissions:
   contents: read
   pull-requests: write
