@@ -74,8 +74,11 @@ on:
         default: ready
         type: string
     secrets:
-      CURVENOTE_TOKEN:
-        description: Curvenote API token
+      GITHUB:
+        description: GitHub API token (usually `env.GITHUB_TOKEN`)
+        required: true
+      CURVENOTE:
+        description: Curvenote API token (usually `secrets.CURVENOTE_TOKEN`)
         required: true
 permissions:
   contents: read
@@ -90,7 +93,7 @@ jobs:
       - id: build-strategy
         uses: curvenote/actions/strategy@main
         env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB }}
         with:
           monorepo: ${{ inputs.monorepo }}
           path: ${{ inputs.path }}
@@ -109,7 +112,7 @@ jobs:
       - uses: curvenote/actions/setup@main
       - uses: curvenote/actions/submit@main
         env:
-          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE_TOKEN }}
+          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         with:
           id: ${{ matrix.id }}
           venue: ${{ inputs.venue }}
@@ -136,6 +139,8 @@ jobs:
       - strategy
       - preview
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
     steps:
       - uses: curvenote/actions/submit-summary@main
         id: summary
