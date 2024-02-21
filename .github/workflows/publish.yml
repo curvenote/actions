@@ -5,11 +5,11 @@ on:
       venue:
         description: The site or venue that this project is being submitted to
         required: true
-        type: boolean
+        type: string
       kind:
         description: The kind of the submission
         required: true
-        type: boolean
+        type: string
       monorepo:
         description: |
           Indicate that this repository contains multiple projects that should be published.
