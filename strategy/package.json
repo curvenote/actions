@@ -1,0 +1,28 @@
+{
+  "type": "module",
+  "name": "@curvenote/actions-strategy",
+  "private": true,
+  "license": "UNLICENSED",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build:esm": "ncc build src/index.ts -o dist",
+    "lint": "eslint \"src/**/!(*.spec).ts\" -c ./.eslintrc.cjs",
+    "lint:format": "prettier --check src/*.ts src/**/*.ts",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "build": "npm-run-all -l clean -p build:esm"
+  },
+  "author": "Rowan Cockett",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^6.0.0",
+    "@octokit/rest": "^20.0.2"
+  },
+  "devDependencies": {
+    "memfs": "^4.7.6"
+  }
+}

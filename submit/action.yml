@@ -1,0 +1,39 @@
+name: Curvenote Preview or Submit
+description: Preview or submit a project to a Curvenote site
+author: Curvenote Inc.
+branding:
+  icon: package
+  color: blue
+inputs:
+  id:
+    description: The ID of the job, used for the log upload
+    required: true
+  working-directory:
+    description: Install typst for PDF rendering
+    required: true
+  venue:
+    description: The site or venue that this project is being submitted to
+    required: true
+  kind:
+    description: The kind of the submission
+    required: true
+  draft:
+    description: Flag to indicate if the submission should be a draft
+    default: false
+runs:
+  using: composite
+  steps:
+    - name: Submit project to Curvenote
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: |
+        if [ "${{ inputs.draft }}" = "true" ]; then
+          curvenote submit ${{ inputs.venue }} --kind ${{ inputs.kind }} --draft -y
+        else
+          curvenote submit ${{ inputs.venue }} --kind ${{ inputs.kind }} -y
+        fi
+    - name: Upload Curvenote Logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: submit-${{ inputs.id }}
+        path: ${{ inputs.working-directory }}/_build/logs

@@ -1,0 +1,16 @@
+name: Curvenote - Submission Summary
+description: A GitHub action to give a summary of the submission jobs that were run
+author: Curvenote Inc.
+branding:
+  icon: package
+  color: blue
+inputs:
+  matrix:
+    description: The build matrix created in the strategy step (JSON)
+    required: true
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+outputs:
+  comment:
+    description: A body of a comment to notify
