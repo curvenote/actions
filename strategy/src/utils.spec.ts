@@ -115,6 +115,6 @@ describe('utility tests', () => {
       false,
     ],
   ])('ensureUniqueAndValidIds %s', async (_, pathIds, valid) => {
-    expect(ensureUniqueAndValidIds(pathIds, '^([a-z0-9-]+)$')).toBe(valid);
+    expect(ensureUniqueAndValidIds(pathIds, '^([a-z0-9-]+)$').valid).toBe(valid);
   });
 });

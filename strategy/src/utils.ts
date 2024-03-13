@@ -126,12 +126,16 @@ export function getIdsFromPaths(paths: string[]): PathIds {
   );
 }
 
-export function ensureUniqueAndValidIds(pathIds: PathIds, idPatternRegex: string): boolean {
+export function ensureUniqueAndValidIds(
+  pathIds: PathIds,
+  idPatternRegex: string,
+): { messages: string[]; valid: boolean } {
+  const messages: string[] = [];
   const idsValid = Object.entries(pathIds).reduce((allValid, [p, id]) => {
     const valid =
       !!id && !!id.match(new RegExp(idPatternRegex)) && !!id.match(/^([a-zA-Z0-9_-]+)$/);
     if (!valid) {
-      console.error(
+      messages.push(
         `Invalid id for path "${p}" (ID: \`${id}\`):\n - Must not be null or empty\n - Must match id-pattern-regex: /${idPatternRegex}/\n - Only includes "a-z A-Z 0-9 - _"\nUpdate ${p}/myst.yml to include a valid project.id`,
       );
     }
@@ -139,7 +143,7 @@ export function ensureUniqueAndValidIds(pathIds: PathIds, idPatternRegex: string
   }, true);
 
   // Early return if any ID is invalid
-  if (!idsValid) return false;
+  if (!idsValid) return { messages, valid: false };
 
   // Check for duplicate IDs
   const ids = Object.values(pathIds) as string[];
@@ -155,16 +159,16 @@ export function ensureUniqueAndValidIds(pathIds: PathIds, idPatternRegex: string
 
   if (duplicates.length > 0) {
     duplicates.forEach(([id]) => {
-      console.error(
+      messages.push(
         `The id "${id}" is repeated in the following directories:\n - "${Object.entries(pathIds)
           .filter(([, test]) => test === id)
           .map(([p]) => p)
           .join('"\n - "')}"`,
       );
     });
-    return false; // Indicate error due to duplicates
+    return { messages, valid: false }; // Indicate error due to duplicates
   }
 
   // If we reach here, all IDs are valid and unique
-  return true;
+  return { messages, valid: true };
 }

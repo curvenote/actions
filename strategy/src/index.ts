@@ -70,11 +70,11 @@ import {
     '\n\n',
   );
 
-  const idsAreValid = ensureUniqueAndValidIds(pathIds, idPatternRegex);
+  const { messages, valid: idsAreValid } = ensureUniqueAndValidIds(pathIds, idPatternRegex);
 
   if (!idsAreValid) {
     core.setFailed(
-      'The project IDs are not valid or are not unique, check the error logs for more information.',
+      `The project IDs are not valid or are not unique, check the error logs for more information.\n\n${messages.join('\n')}`,
     );
     return;
   }
