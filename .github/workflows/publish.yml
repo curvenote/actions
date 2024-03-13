@@ -97,6 +97,9 @@ permissions:
   pull-requests: write
 jobs:
   strategy:
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.build-strategy.outputs.matrix }}
@@ -115,6 +118,9 @@ jobs:
           submit-label: ${{ inputs.submit-label }}
   preview:
     needs: strategy
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
@@ -134,6 +140,9 @@ jobs:
           draft: true
   check:
     needs: strategy
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
@@ -151,6 +160,9 @@ jobs:
     needs:
       - strategy
       - preview
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
