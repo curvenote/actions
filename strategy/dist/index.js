@@ -39654,6 +39654,8 @@ function ensureUniqueAndValidIds(pathIds, idPatternRegex) {
     const enforceSingleFolder = typeof rawEnforceSingleFolder === 'boolean'
         ? rawEnforceSingleFolder
         : hasIntersection(rawEnforceSingleFolder, prLabels);
+    const doPreview = typeof previewLabel === 'boolean' ? previewLabel : hasIntersection(previewLabel, prLabels);
+    const doSubmit = typeof submitLabel === 'boolean' ? submitLabel : hasIntersection(submitLabel, prLabels);
     const pathIds = getIdsFromPaths(paths);
     const { filteredPaths, unknownChangedFiles } = filterPathsAndIdentifyUnknownChanges(paths, changedFiles);
     const idsAreValid = ensureUniqueAndValidIds(pathIds, idPatternRegex);
@@ -39667,22 +39669,23 @@ function ensureUniqueAndValidIds(pathIds, idPatternRegex) {
         changedFiles,
         filteredPaths,
         unknownChangedFiles,
+        prLabels,
         previewLabel,
+        doPreview,
         submitLabel,
+        doSubmit,
     });
     if (!idsAreValid) {
         core.setFailed('The project IDs are not valid or are not unique, check the error logs for more information.');
         return;
     }
     if (enforceSingleFolder && filteredPaths.length > 1) {
-        console.log({ paths, changedFiles, filteredPaths, unknownChangedFiles });
         core.setFailed(`The strategy is set to fail when changes are made outside of the single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
 The changes are across multiple paths:
   - ${filteredPaths.join('\n  - ')}`);
         return;
     }
     if (enforceSingleFolder && unknownChangedFiles.length > 0) {
-        console.log({ paths, changedFiles, filteredPaths, unknownChangedFiles });
         core.setFailed(`The strategy is set to fail when changes are made outside of the single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
 There are changes in:
   - ${unknownChangedFiles.join('\n  - ')}`);

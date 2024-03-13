@@ -38,6 +38,10 @@ import {
     typeof rawEnforceSingleFolder === 'boolean'
       ? rawEnforceSingleFolder
       : hasIntersection(rawEnforceSingleFolder, prLabels);
+  const doPreview =
+    typeof previewLabel === 'boolean' ? previewLabel : hasIntersection(previewLabel, prLabels);
+  const doSubmit =
+    typeof submitLabel === 'boolean' ? submitLabel : hasIntersection(submitLabel, prLabels);
 
   const pathIds = getIdsFromPaths(paths);
 
@@ -58,8 +62,11 @@ import {
     changedFiles,
     filteredPaths,
     unknownChangedFiles,
+    prLabels,
     previewLabel,
+    doPreview,
     submitLabel,
+    doSubmit,
   });
 
   if (!idsAreValid) {
@@ -70,7 +77,6 @@ import {
   }
 
   if (enforceSingleFolder && filteredPaths.length > 1) {
-    console.log({ paths, changedFiles, filteredPaths, unknownChangedFiles });
     core.setFailed(
       `The strategy is set to fail when changes are made outside of the single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
 The changes are across multiple paths:
@@ -79,7 +85,6 @@ The changes are across multiple paths:
     return;
   }
   if (enforceSingleFolder && unknownChangedFiles.length > 0) {
-    console.log({ paths, changedFiles, filteredPaths, unknownChangedFiles });
     core.setFailed(
       `The strategy is set to fail when changes are made outside of the single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
 There are changes in:
