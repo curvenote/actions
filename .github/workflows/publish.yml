@@ -115,10 +115,11 @@ jobs:
           submit-label: ${{ inputs.submit-label }}
   preview:
     needs: strategy
+    runs-on: ubuntu-latest
     concurrency:
       group: preview-${{ github.ref }}
       cancel-in-progress: true
-    runs-on: ubuntu-latest
+    if: ${{ needs.strategy.outputs.preview }}
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
@@ -134,7 +135,7 @@ jobs:
           venue: ${{ inputs.venue }}
           kind: ${{ inputs.kind }}
           working-directory: ${{ matrix.working-directory }}
-          draft: true
+          draft: ${{ matrix.draft }}
   check:
     needs: strategy
     runs-on: ubuntu-latest

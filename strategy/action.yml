@@ -77,8 +77,10 @@ runs:
   using: 'node20'
   main: 'dist/index.js'
 outputs:
-  published:
-    description: A boolean value to indicate whether a publishing is happened or not
+  check:
+    description: A boolean value to indicate whether a check job should occur
+  preview:
+    description: A boolean value to indicate whether a preview job should occur
   matrix:
     description: >
       A JSON object describing the build matrix, this can be used to inform other build steps.

@@ -96,11 +96,18 @@ There are changes in:
     return;
   }
 
+  // Indicate whether to run the next jobs
+  core.setOutput('preview', doPreview);
+  core.setOutput('check', true);
   // Set the build matrix
   core.setOutput(
     'matrix',
     JSON.stringify({
-      include: filteredPaths.map((p) => ({ id: pathIds[p], 'working-directory': p })),
+      include: filteredPaths.map((p) => ({
+        id: pathIds[p],
+        'working-directory': p,
+        draft: !doSubmit,
+      })),
     }),
   );
 })().catch((err) => {
