@@ -126,12 +126,13 @@ export function getIdsFromPaths(paths: string[]): PathIds {
   );
 }
 
-export function ensureUniqueAndValidIds(pathIds: PathIds): boolean {
+export function ensureUniqueAndValidIds(pathIds: PathIds, idPatternRegex: string): boolean {
   const idsValid = Object.entries(pathIds).reduce((allValid, [p, id]) => {
-    const valid = !!id && !!id.match(/^([a-zA-Z0-9_-]+)$/);
+    const valid =
+      !!id && !!id.match(new RegExp(idPatternRegex)) && !!id.match(/^([a-zA-Z0-9_-]+)$/);
     if (!valid) {
       console.error(
-        `Invalid id for path "${p}" (ID: \`${id}\`):\n - Must not be null or empty\n - Only includes "a-z A-Z 0-9 - _"`,
+        `Invalid id for path "${p}" (ID: \`${id}\`):\n - Must not be null or empty\n - Must match id-pattern-regex: /${idPatternRegex}/\n - Only includes "a-z A-Z 0-9 - _"\nUpdate ${p}/myst.yml to include a valid project.id`,
       );
     }
     return allValid && valid;
@@ -154,7 +155,12 @@ export function ensureUniqueAndValidIds(pathIds: PathIds): boolean {
 
   if (duplicates.length > 0) {
     duplicates.forEach(([id]) => {
-      console.error(`The id "${id}" is repeated.`);
+      console.error(
+        `The id "${id}" is repeated in the following directories:\n - "${Object.entries(pathIds)
+          .filter(([, test]) => test === id)
+          .map(([p]) => p)
+          .join('"\n - "')}"`,
+      );
     });
     return false; // Indicate error due to duplicates
   }

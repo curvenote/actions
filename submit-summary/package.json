@@ -10,8 +10,6 @@
     "build:esm": "ncc build src/index.ts -o dist",
     "lint": "eslint \"src/**/!(*.spec).ts\" -c ./.eslintrc.cjs",
     "lint:format": "prettier --check src/*.ts src/**/*.ts",
-    "test": "vitest run",
-    "test:watch": "vitest watch",
     "build": "npm-run-all -l clean -p build:esm"
   },
   "author": "Rowan Cockett",

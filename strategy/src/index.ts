@@ -41,7 +41,26 @@ import {
 
   const pathIds = getIdsFromPaths(paths);
 
-  const idsAreValid = ensureUniqueAndValidIds(pathIds);
+  const { filteredPaths, unknownChangedFiles } = filterPathsAndIdentifyUnknownChanges(
+    paths,
+    changedFiles,
+  );
+
+  const idsAreValid = ensureUniqueAndValidIds(pathIds, idPatternRegex);
+
+  console.log({
+    monorepo,
+    enforceSingleFolder,
+    paths,
+    pathIds,
+    idPatternRegex,
+    idsAreValid,
+    changedFiles,
+    filteredPaths,
+    unknownChangedFiles,
+    previewLabel,
+    submitLabel,
+  });
 
   if (!idsAreValid) {
     core.setFailed(
@@ -49,11 +68,6 @@ import {
     );
     return;
   }
-
-  const { filteredPaths, unknownChangedFiles } = filterPathsAndIdentifyUnknownChanges(
-    paths,
-    changedFiles,
-  );
 
   if (enforceSingleFolder && filteredPaths.length > 1) {
     console.log({ paths, changedFiles, filteredPaths, unknownChangedFiles });
@@ -74,18 +88,6 @@ There are changes in:
     return;
   }
 
-  console.log({
-    monorepo,
-    enforceSingleFolder,
-    paths,
-    idPatternRegex,
-    pathIds,
-    changedFiles,
-    filteredPaths,
-    unknownChangedFiles,
-    previewLabel,
-    submitLabel,
-  });
   // Set the build matrix
   core.setOutput(
     'matrix',

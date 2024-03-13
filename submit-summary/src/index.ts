@@ -51,7 +51,6 @@ function reportSummaryMessage(report: Report, buildUrl: string) {
   const matrix = JSON.parse(core.getInput('matrix')) as {
     include: { id: string; 'working-directory': string }[];
   };
-  console.log();
 
   await Promise.all(
     list.artifacts.map((a) =>

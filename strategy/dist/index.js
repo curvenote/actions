@@ -39595,11 +39595,11 @@ function getIdsFromPaths(paths) {
         return [p, data.project.id];
     }));
 }
-function ensureUniqueAndValidIds(pathIds) {
+function ensureUniqueAndValidIds(pathIds, idPatternRegex) {
     const idsValid = Object.entries(pathIds).reduce((allValid, [p, id]) => {
-        const valid = !!id && !!id.match(/^([a-zA-Z0-9_-]+)$/);
+        const valid = !!id && !!id.match(new RegExp(idPatternRegex)) && !!id.match(/^([a-zA-Z0-9_-]+)$/);
         if (!valid) {
-            console.error(`Invalid id for path "${p}" (ID: \`${id}\`):\n - Must not be null or empty\n - Only includes "a-z A-Z 0-9 - _"`);
+            console.error(`Invalid id for path "${p}" (ID: \`${id}\`):\n - Must not be null or empty\n - Must match id-pattern-regex: /${idPatternRegex}/\n - Only includes "a-z A-Z 0-9 - _"\nUpdate ${p}/myst.yml to include a valid project.id`);
         }
         return allValid && valid;
     }, true);
@@ -39615,7 +39615,10 @@ function ensureUniqueAndValidIds(pathIds) {
     const duplicates = Object.entries(idCounts).filter(([, count]) => count > 1);
     if (duplicates.length > 0) {
         duplicates.forEach(([id]) => {
-            console.error(`The id "${id}" is repeated.`);
+            console.error(`The id "${id}" is repeated in the following directories:\n - "${Object.entries(pathIds)
+                .filter(([, test]) => test === id)
+                .map(([p]) => p)
+                .join('"\n - "')}"`);
         });
         return false; // Indicate error due to duplicates
     }
@@ -39652,12 +39655,25 @@ function ensureUniqueAndValidIds(pathIds) {
         ? rawEnforceSingleFolder
         : hasIntersection(rawEnforceSingleFolder, prLabels);
     const pathIds = getIdsFromPaths(paths);
-    const idsAreValid = ensureUniqueAndValidIds(pathIds);
+    const { filteredPaths, unknownChangedFiles } = filterPathsAndIdentifyUnknownChanges(paths, changedFiles);
+    const idsAreValid = ensureUniqueAndValidIds(pathIds, idPatternRegex);
+    console.log({
+        monorepo,
+        enforceSingleFolder,
+        paths,
+        pathIds,
+        idPatternRegex,
+        idsAreValid,
+        changedFiles,
+        filteredPaths,
+        unknownChangedFiles,
+        previewLabel,
+        submitLabel,
+    });
     if (!idsAreValid) {
         core.setFailed('The project IDs are not valid or are not unique, check the error logs for more information.');
         return;
     }
-    const { filteredPaths, unknownChangedFiles } = filterPathsAndIdentifyUnknownChanges(paths, changedFiles);
     if (enforceSingleFolder && filteredPaths.length > 1) {
         console.log({ paths, changedFiles, filteredPaths, unknownChangedFiles });
         core.setFailed(`The strategy is set to fail when changes are made outside of the single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
@@ -39672,18 +39688,6 @@ There are changes in:
   - ${unknownChangedFiles.join('\n  - ')}`);
         return;
     }
-    console.log({
-        monorepo,
-        enforceSingleFolder,
-        paths,
-        idPatternRegex,
-        pathIds,
-        changedFiles,
-        filteredPaths,
-        unknownChangedFiles,
-        previewLabel,
-        submitLabel,
-    });
     // Set the build matrix
     core.setOutput('matrix', JSON.stringify({
         include: filteredPaths.map((p) => ({ id: pathIds[p], 'working-directory': p })),
