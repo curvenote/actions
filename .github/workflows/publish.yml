@@ -99,6 +99,8 @@ jobs:
   strategy:
     runs-on: ubuntu-latest
     outputs:
+      check: ${{ steps.build-strategy.outputs.check }}
+      preview: ${{ steps.build-strategy.outputs.preview }}
       matrix: ${{ steps.build-strategy.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
