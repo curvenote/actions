@@ -6,6 +6,8 @@ import {
   getIntersection,
   resolvePaths,
   filterPathsAndIdentifyUnknownChanges,
+  getIdsFromPaths,
+  ensureUniqueAndValidIds,
 } from './utils.js';
 
 vi.mock('fs', () => memfs.fs);
@@ -64,5 +66,55 @@ describe('utility tests', () => {
       filteredPaths: ['posters/poster-1', 'posters/poster-2'],
       unknownChangedFiles: ['.git/temp.bin'],
     });
+  });
+
+  it('getIdsFromPaths', async () => {
+    memfs.vol.fromJSON({
+      'papers/paper-1/curvenote.yml': 'project:\n  id: project-1',
+      'papers/paper-2/myst.yml': 'project:\n  id: project-2',
+    });
+    const paths = await resolvePaths('.', 'papers/*');
+    expect(paths).toEqual(['papers/paper-1', 'papers/paper-2']);
+    expect(getIdsFromPaths(paths)).toEqual({
+      'papers/paper-1': 'project-1',
+      'papers/paper-2': 'project-2',
+    });
+  });
+
+  it.each([
+    [
+      'valid',
+      {
+        'papers/paper-1': 'project-1',
+        'papers/paper-2': 'project-2',
+      },
+      true,
+    ],
+    [
+      'duplicated',
+      {
+        'papers/paper-1': 'project-1',
+        'papers/paper-2': 'project-1',
+      },
+      false,
+    ],
+    [
+      'null',
+      {
+        'papers/paper-1': null,
+        'papers/paper-2': 'project-1',
+      },
+      false,
+    ],
+    [
+      'empty string',
+      {
+        'papers/paper-1': '',
+        'papers/paper-2': 'project-1',
+      },
+      false,
+    ],
+  ])('ensureUniqueAndValidIds %s', async (_, pathIds, valid) => {
+    expect(ensureUniqueAndValidIds(pathIds)).toBe(valid);
   });
 });

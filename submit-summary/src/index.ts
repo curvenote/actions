@@ -40,9 +40,9 @@ function reportSummaryMessage(report: Report, buildUrl: string) {
   const total = summary.pass + summary.fail;
   if (total === 0) return 'No checks ran';
   if (summary.fail === 0) {
-    return `✅ [${summary.pass} checks passed${summary.optional ? ` (${summary.optional} optional checks failed)` : ''}](${buildUrl}#checks)`;
+    return `✅ [${summary.pass} checks passed${summary.optional ? ` (${summary.optional} optional)` : ''}](${buildUrl}#checks)`;
   }
-  return `❌ [${summary.pass}/${total} checks passed${summary.optional ? ` (${summary.optional} optional checks failed)` : ''}](${buildUrl}#checks)`;
+  return `❌ [${summary.pass}/${total} checks passed${summary.optional ? ` (${summary.optional} optional)` : ''}](${buildUrl}#checks)`;
 }
 
 (async () => {
@@ -80,7 +80,7 @@ function reportSummaryMessage(report: Report, buildUrl: string) {
     );
 
   const table = `
-| Working Directory | Preview | Checks | Updated (UTC) |
+| Directory | Preview | Checks | Updated (UTC) |
 | :--- | :--- | :--- | :--- |
 ${submitLogs.map(({ data, info }) => `| **${info['working-directory']}** | 🔍 [Inspect](${data.buildUrl}) | ${reportSummaryMessage(data.report, data.buildUrl)} | ${formatDateUTC(data.submissionVersion.date_created)} |`).join('\n')}
 `;

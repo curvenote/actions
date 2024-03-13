@@ -4,7 +4,9 @@ import { Octokit } from '@octokit/rest';
 import { getPullRequestLabels } from './githubUtils.js';
 import {
   booleanOrLabels,
+  ensureUniqueAndValidIds,
   filterPathsAndIdentifyUnknownChanges,
+  getIdsFromPaths,
   hasIntersection,
   resolvePaths,
 } from './utils.js';
@@ -25,16 +27,28 @@ import {
     );
     return;
   }
-  const previewLabel = booleanOrLabels(core.getInput('previewLabel'));
-  const submitLabel = booleanOrLabels(core.getInput('submitLabel'));
+  const previewLabel = booleanOrLabels(core.getInput('preview-label'));
+  const submitLabel = booleanOrLabels(core.getInput('submit-label'));
+  const idPatternRegex = core.getInput('id-pattern-regex');
 
   const changedFiles = await getChangedFiles();
   const prLabels = await getPullRequestLabels(octokit);
-  const rawEnforceSingleFolder = booleanOrLabels(core.getInput('enforceSingleFolder'));
+  const rawEnforceSingleFolder = booleanOrLabels(core.getInput('enforce-single-folder'));
   const enforceSingleFolder =
     typeof rawEnforceSingleFolder === 'boolean'
       ? rawEnforceSingleFolder
       : hasIntersection(rawEnforceSingleFolder, prLabels);
+
+  const pathIds = getIdsFromPaths(paths);
+
+  const idsAreValid = ensureUniqueAndValidIds(pathIds);
+
+  if (!idsAreValid) {
+    core.setFailed(
+      'The project IDs are not valid or are not unique, check the error logs for more information.',
+    );
+    return;
+  }
 
   const { filteredPaths, unknownChangedFiles } = filterPathsAndIdentifyUnknownChanges(
     paths,
@@ -64,6 +78,8 @@ There are changes in:
     monorepo,
     enforceSingleFolder,
     paths,
+    idPatternRegex,
+    pathIds,
     changedFiles,
     filteredPaths,
     unknownChangedFiles,
@@ -74,12 +90,9 @@ There are changes in:
   core.setOutput(
     'matrix',
     JSON.stringify({
-      include: filteredPaths.map((p, i) => ({ id: String(i), 'working-directory': p })),
+      include: filteredPaths.map((p) => ({ id: pathIds[p], 'working-directory': p })),
     }),
   );
-
-  core.setOutput('published', 'false');
-  core.setOutput('publishedPackages', '[]');
 })().catch((err) => {
   core.error(err);
   core.setFailed(err.message);
