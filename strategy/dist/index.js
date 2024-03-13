@@ -35597,11 +35597,15 @@ var github = __nccwpck_require__(2189);
 ;// CONCATENATED MODULE: ./src/githubUtils.ts
 
 
-async function getPullRequestLabels(octokit) {
+function getPullRequestInfo() {
     var _a;
     // Using the context from @actions/github to get the PR number
     const { owner, repo } = github.context.repo;
     const pull_number = (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
+    return { owner, repo, pull_number };
+}
+async function getPullRequestLabels(octokit) {
+    const { owner, repo, pull_number } = getPullRequestInfo();
     if (!pull_number) {
         console.log('Could not find pull request number in the context.');
         return [];
@@ -35619,6 +35623,21 @@ async function getPullRequestLabels(octokit) {
         core.setFailed('Error fetching pull request labels');
         return [];
     }
+}
+async function getPullRequestReviewers(octokit) {
+    var _a, _b;
+    const { owner, repo, pull_number } = getPullRequestInfo();
+    if (!pull_number) {
+        console.log('Could not find pull request number in the context.');
+        return [];
+    }
+    const { data: prData } = await octokit.pulls.get({
+        owner,
+        repo,
+        pull_number,
+    });
+    console.log('Assignees:', (_a = prData.assignees) === null || _a === void 0 ? void 0 : _a.map((a) => a.login));
+    console.log('Reviewers:', (_b = prData.requested_reviewers) === null || _b === void 0 ? void 0 : _b.map((r) => r.login));
 }
 
 // EXTERNAL MODULE: external "fs"
@@ -39642,6 +39661,7 @@ function ensureUniqueAndValidIds(pathIds, idPatternRegex) {
     const octokit = new dist_node.Octokit({ auth: githubToken });
     const monorepo = core.getInput('monorepo') === 'true';
     const paths = await resolvePaths('', core.getInput('path'));
+    await getPullRequestReviewers(octokit);
     if (!monorepo && paths.length !== 1) {
         core.setFailed('Cannot include multiple paths if the strategy is not a monorepo.\n\nEither set `monorepo: true` or set a single path (without glob-like patterns).');
         return;

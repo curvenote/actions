@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import { getChangedFiles } from './gitUtils.js';
 import { Octokit } from '@octokit/rest';
-import { getPullRequestLabels } from './githubUtils.js';
+import { getPullRequestLabels, getPullRequestReviewers } from './githubUtils.js';
 import {
   booleanOrLabels,
   ensureUniqueAndValidIds,
@@ -20,6 +20,7 @@ import {
   const octokit = new Octokit({ auth: githubToken });
   const monorepo = core.getInput('monorepo') === 'true';
   const paths = await resolvePaths('', core.getInput('path'));
+  await getPullRequestReviewers(octokit);
 
   if (!monorepo && paths.length !== 1) {
     core.setFailed(
