@@ -99,7 +99,7 @@ jobs:
   strategy:
     concurrency:
       group: ${{ github.ref }}
-      cancel-in-progress: true
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.build-strategy.outputs.matrix }}
@@ -142,7 +142,7 @@ jobs:
     needs: strategy
     concurrency:
       group: ${{ github.ref }}
-      cancel-in-progress: true
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
@@ -162,7 +162,7 @@ jobs:
       - preview
     concurrency:
       group: ${{ github.ref }}
-      cancel-in-progress: true
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
