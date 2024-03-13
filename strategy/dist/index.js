@@ -39658,14 +39658,12 @@ function ensureUniqueAndValidIds(pathIds, idPatternRegex) {
     const doSubmit = typeof submitLabel === 'boolean' ? submitLabel : hasIntersection(submitLabel, prLabels);
     const pathIds = getIdsFromPaths(paths);
     const { filteredPaths, unknownChangedFiles } = filterPathsAndIdentifyUnknownChanges(paths, changedFiles);
-    const idsAreValid = ensureUniqueAndValidIds(pathIds, idPatternRegex);
-    console.log({
+    console.log('Strategy Inputs:\n\n', {
         monorepo,
         enforceSingleFolder,
         paths,
         pathIds,
         idPatternRegex,
-        idsAreValid,
         changedFiles,
         filteredPaths,
         unknownChangedFiles,
@@ -39674,7 +39672,8 @@ function ensureUniqueAndValidIds(pathIds, idPatternRegex) {
         doPreview,
         submitLabel,
         doSubmit,
-    });
+    }, '\n\n');
+    const idsAreValid = ensureUniqueAndValidIds(pathIds, idPatternRegex);
     if (!idsAreValid) {
         core.setFailed('The project IDs are not valid or are not unique, check the error logs for more information.');
         return;

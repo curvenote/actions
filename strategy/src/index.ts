@@ -50,24 +50,27 @@ import {
     changedFiles,
   );
 
-  const idsAreValid = ensureUniqueAndValidIds(pathIds, idPatternRegex);
+  console.log(
+    'Strategy Inputs:\n\n',
+    {
+      monorepo,
+      enforceSingleFolder,
+      paths,
+      pathIds,
+      idPatternRegex,
+      changedFiles,
+      filteredPaths,
+      unknownChangedFiles,
+      prLabels,
+      previewLabel,
+      doPreview,
+      submitLabel,
+      doSubmit,
+    },
+    '\n\n',
+  );
 
-  console.log({
-    monorepo,
-    enforceSingleFolder,
-    paths,
-    pathIds,
-    idPatternRegex,
-    idsAreValid,
-    changedFiles,
-    filteredPaths,
-    unknownChangedFiles,
-    prLabels,
-    previewLabel,
-    doPreview,
-    submitLabel,
-    doSubmit,
-  });
+  const idsAreValid = ensureUniqueAndValidIds(pathIds, idPatternRegex);
 
   if (!idsAreValid) {
     core.setFailed(
