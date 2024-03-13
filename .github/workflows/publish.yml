@@ -141,6 +141,7 @@ jobs:
   check:
     needs: strategy
     runs-on: ubuntu-latest
+    if: ${{ needs.strategy.outputs.check == 'true'}}
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
