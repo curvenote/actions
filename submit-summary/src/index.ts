@@ -65,7 +65,7 @@ function reportSummaryMessage(report: Report, buildUrl: string) {
       const name = path.join('logs', dir, 'curvenote.submit.json');
       if (!fs.existsSync(name)) return null;
       const data = JSON.parse(fs.readFileSync(name).toString());
-      const info = matrix.include.find(({ id }) => id === dir.split('-')[1]);
+      const info = matrix.include.find(({ id }) => id === dir.replace('submit-', ''));
       return { dir, data, info };
     })
     .filter(

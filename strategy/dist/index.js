@@ -39681,7 +39681,7 @@ function ensureUniqueAndValidIds(pathIds, idPatternRegex) {
     }
     if (enforceSingleFolder && filteredPaths.length > 1) {
         core.setFailed(`The strategy is set to fail when changes are made outside of the single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
-The changes are across multiple paths:
+There are changes in multiple folders:
   - ${filteredPaths.join('\n  - ')}`);
         return;
     }
