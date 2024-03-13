@@ -121,7 +121,7 @@ jobs:
     concurrency:
       group: preview-${{ github.ref }}
       cancel-in-progress: true
-    if: ${{ needs.strategy.outputs.preview }}
+    if: ${{ needs.strategy.outputs.preview == 'true'}}
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
