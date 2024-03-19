@@ -35625,19 +35625,20 @@ async function getPullRequestLabels(octokit) {
     }
 }
 async function getPullRequestReviewers(octokit) {
-    var _a, _b;
+    var _a, _b, _c, _d;
     const { owner, repo, pull_number } = getPullRequestInfo();
     if (!pull_number) {
         console.log('Could not find pull request number in the context.');
-        return [];
+        return undefined;
     }
     const { data: prData } = await octokit.pulls.get({
         owner,
         repo,
         pull_number,
     });
-    console.log('Assignees:', (_a = prData.assignees) === null || _a === void 0 ? void 0 : _a.map((a) => a.login));
-    console.log('Reviewers:', (_b = prData.requested_reviewers) === null || _b === void 0 ? void 0 : _b.map((r) => r.login));
+    const assignees = (_b = (_a = prData.assignees) === null || _a === void 0 ? void 0 : _a.map((a) => a.login)) !== null && _b !== void 0 ? _b : [];
+    const reviewers = (_d = (_c = prData.requested_reviewers) === null || _c === void 0 ? void 0 : _c.map((r) => r.login)) !== null && _d !== void 0 ? _d : [];
+    return { assignees, reviewers };
 }
 
 // EXTERNAL MODULE: external "fs"
@@ -39653,6 +39654,7 @@ function ensureUniqueAndValidIds(pathIds, idPatternRegex) {
 
 
 (async () => {
+    var _a;
     const githubToken = process.env.GITHUB_TOKEN;
     if (!githubToken) {
         core.setFailed('Please add the GITHUB_TOKEN to the strategy action');
@@ -39661,7 +39663,7 @@ function ensureUniqueAndValidIds(pathIds, idPatternRegex) {
     const octokit = new dist_node.Octokit({ auth: githubToken });
     const monorepo = core.getInput('monorepo') === 'true';
     const paths = await resolvePaths('', core.getInput('path'));
-    await getPullRequestReviewers(octokit);
+    const { assignees, reviewers } = (_a = (await getPullRequestReviewers(octokit))) !== null && _a !== void 0 ? _a : {};
     if (!monorepo && paths.length !== 1) {
         core.setFailed('Cannot include multiple paths if the strategy is not a monorepo.\n\nEither set `monorepo: true` or set a single path (without glob-like patterns).');
         return;
@@ -39693,6 +39695,8 @@ function ensureUniqueAndValidIds(pathIds, idPatternRegex) {
         doPreview,
         submitLabel,
         doSubmit,
+        assignees,
+        reviewers,
     }, '\n\n');
     const { messages, valid: idsAreValid } = ensureUniqueAndValidIds(pathIds, idPatternRegex);
     if (!idsAreValid) {

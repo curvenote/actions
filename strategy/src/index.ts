@@ -20,7 +20,7 @@ import {
   const octokit = new Octokit({ auth: githubToken });
   const monorepo = core.getInput('monorepo') === 'true';
   const paths = await resolvePaths('', core.getInput('path'));
-  await getPullRequestReviewers(octokit);
+  const { assignees, reviewers } = (await getPullRequestReviewers(octokit)) ?? {};
 
   if (!monorepo && paths.length !== 1) {
     core.setFailed(
@@ -67,6 +67,8 @@ import {
       doPreview,
       submitLabel,
       doSubmit,
+      assignees,
+      reviewers,
     },
     '\n\n',
   );

@@ -29,11 +29,13 @@ export async function getPullRequestLabels(octokit: Octokit) {
   }
 }
 
-export async function getPullRequestReviewers(octokit: Octokit) {
+export async function getPullRequestReviewers(
+  octokit: Octokit,
+): Promise<{ assignees: string[]; reviewers: string[] } | undefined> {
   const { owner, repo, pull_number } = getPullRequestInfo();
   if (!pull_number) {
     console.log('Could not find pull request number in the context.');
-    return [];
+    return undefined;
   }
   const { data: prData } = await octokit.pulls.get({
     owner,
@@ -41,12 +43,8 @@ export async function getPullRequestReviewers(octokit: Octokit) {
     pull_number,
   });
 
-  console.log(
-    'Assignees:',
-    prData.assignees?.map((a) => a.login),
-  );
-  console.log(
-    'Reviewers:',
-    prData.requested_reviewers?.map((r) => r.login),
-  );
+  const assignees = prData.assignees?.map((a) => a.login) ?? [];
+  const reviewers = prData.requested_reviewers?.map((r) => r.login) ?? [];
+
+  return { assignees, reviewers };
 }
