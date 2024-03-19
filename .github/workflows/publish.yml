@@ -10,6 +10,16 @@ on:
         description: The kind of the submission
         required: true
         type: string
+      id-pattern-regex:
+        description: |
+          A regular expression that all IDs must follow, by default this matches a UUID.
+
+          This can be used to enforce that all project IDs follow a specific pattern, such as,
+          the conference name + year.
+
+          The ID must also satisfy alphanumeric characters, dashes, and underscores.
+        type: string
+        default: '^([a-zA-Z0-9-]{36})$'
       monorepo:
         description: |
           Indicate that this repository contains multiple projects that should be published.
@@ -35,7 +45,7 @@ on:
         required: false
         default: '.'
         type: string
-      enforceSingleFolder:
+      enforce-single-folder:
         description: |
           When true, an error will be raised if a pull-request is touching multiple
           different folders. This can either be `true` or a label string.
@@ -44,7 +54,7 @@ on:
           If labels are used to control this property, the pull request will only fail in
           PRs with these labels.
 
-          This can be used in conjunction with the `previewLabel`, for example, if they
+          This can be used in conjunction with the `preview-label`, for example, if they
           are both `paper` then the PRs with those labels will be required to only make changes
           in a single folder and will not be previewed if that condition fails.
           However, you can add additional preview labels, e.g. `all-papers`, which will build
@@ -52,7 +62,7 @@ on:
         required: false
         default: 'false'
         type: string
-      previewLabel:
+      preview-label:
         description: |
           A pull-request label that indicates the preview and checks should be run.
           Multiple labels can be added with comma-separated values.
@@ -60,16 +70,18 @@ on:
           If no label is supplied, the preview will run on all PRs.
         required: false
         type: string
-      submitLabel:
+      submit-label:
         description: |
-          A pull-request label that indicates the branch should be turned into a submission.
-          This will notify all curators of the Curvenote site.
+          A boolean or pull-request label that indicates the branch should be turned into a submission.
 
-          The submission identifiers will be written directly to the repository in a commit,
-          and the submission will be available to be merged on the Curvenote platform.
+          If a submission is created, all curators of the Curvenote site will be notified.
 
-          A submission will not happen unless both the `enforceSingleFolder` and `previewLabel`
-          conditions are satisfied.
+          When a preview is requested but not a submission, because this flag is either false or the PR
+          does not have the specified label, a draft will be made that is unlinked to the submission
+          history and will be deleted in 30 days.
+
+          A submission will not happen unless both the `enforce-single-folder` and `preview-label`
+          conditions are also satisfied.
         required: false
         default: ready
         type: string
@@ -87,6 +99,8 @@ jobs:
   strategy:
     runs-on: ubuntu-latest
     outputs:
+      check: ${{ steps.build-strategy.outputs.check }}
+      preview: ${{ steps.build-strategy.outputs.preview }}
       matrix: ${{ steps.build-strategy.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
@@ -97,12 +111,17 @@ jobs:
         with:
           monorepo: ${{ inputs.monorepo }}
           path: ${{ inputs.path }}
-          enforceSingleFolder: ${{ inputs.enforceSingleFolder }}
-          previewLabel: ${{ inputs.previewLabel }}
-          submitLabel: ${{ inputs.submitLabel }}
+          enforce-single-folder: ${{ inputs.enforce-single-folder }}
+          id-pattern-regex: ${{ inputs.id-pattern-regex }}
+          preview-label: ${{ inputs.preview-label }}
+          submit-label: ${{ inputs.submit-label }}
   preview:
     needs: strategy
     runs-on: ubuntu-latest
+    concurrency:
+      group: preview-${{ github.ref }}
+      cancel-in-progress: true
+    if: ${{ needs.strategy.outputs.preview == 'true'}}
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
@@ -118,10 +137,11 @@ jobs:
           venue: ${{ inputs.venue }}
           kind: ${{ inputs.kind }}
           working-directory: ${{ matrix.working-directory }}
-          draft: true
+          draft: ${{ matrix.draft }}
   check:
     needs: strategy
     runs-on: ubuntu-latest
+    if: ${{ needs.strategy.outputs.check == 'true'}}
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:

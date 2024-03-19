@@ -6,7 +6,7 @@ branding:
   color: blue
 inputs:
   id:
-    description: The ID of the job, used for the log upload
+    description: The ID of the submission, used to maintain the submission history as well as store the logs on github
     required: true
   working-directory:
     description: Install typst for PDF rendering
@@ -30,7 +30,7 @@ runs:
         if [ "${{ inputs.draft }}" = "true" ]; then
           curvenote submit ${{ inputs.venue }} --kind ${{ inputs.kind }} --draft -y
         else
-          curvenote submit ${{ inputs.venue }} --kind ${{ inputs.kind }} -y
+          curvenote submit ${{ inputs.venue }} --kind ${{ inputs.kind }} --key ${{ inputs.id }} -y
         fi
     - name: Upload Curvenote Logs
       uses: actions/upload-artifact@v4

@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import yaml from 'js-yaml';
 import { promisify } from 'util';
 
-export function booleanOrLabels(value: string): boolean | string[] {
-  if (value === 'true') return true;
-  if (value === 'false') return false;
+export function booleanOrLabels(value: string | boolean): boolean | string[] {
+  if (value === 'true' || value === true) return true;
+  if (value === 'false' || value === false) return false;
   return value.split(',').map((s) => s.trim());
 }
 
@@ -97,4 +98,77 @@ export function filterPathsAndIdentifyUnknownChanges(
   });
 
   return { filteredPaths, unknownChangedFiles };
+}
+
+function loadConfig(p: string) {
+  const config = [path.join(p, 'myst.yml'), path.join(p, 'curvenote.yml')].find((yml) =>
+    fs.existsSync(yml),
+  );
+  if (!config) return null;
+  const data = fs.readFileSync(config).toString();
+  try {
+    return yaml.load(data) as { project?: { id?: string } };
+  } catch (error) {
+    console.error(`Problem loading config file at: ${config}`);
+  }
+  return null;
+}
+
+type PathIds = Record<string, string | null>;
+
+export function getIdsFromPaths(paths: string[]): PathIds {
+  return Object.fromEntries(
+    paths.map((p) => {
+      const data = loadConfig(p);
+      if (!data?.project?.id) return [p, null];
+      return [p, data.project.id];
+    }),
+  );
+}
+
+export function ensureUniqueAndValidIds(
+  pathIds: PathIds,
+  idPatternRegex: string,
+): { messages: string[]; valid: boolean } {
+  const messages: string[] = [];
+  const idsValid = Object.entries(pathIds).reduce((allValid, [p, id]) => {
+    const valid =
+      !!id && !!id.match(new RegExp(idPatternRegex)) && !!id.match(/^([a-zA-Z0-9_-]+)$/);
+    if (!valid) {
+      messages.push(
+        `Invalid id for path "${p}" (ID: \`${id}\`):\n - Must not be null or empty\n - Must match id-pattern-regex: /${idPatternRegex}/\n - Only includes "a-z A-Z 0-9 - _"\nUpdate ${p}/myst.yml to include a valid project.id`,
+      );
+    }
+    return allValid && valid;
+  }, true);
+
+  // Early return if any ID is invalid
+  if (!idsValid) return { messages, valid: false };
+
+  // Check for duplicate IDs
+  const ids = Object.values(pathIds) as string[];
+  const idCounts = ids.reduce(
+    (acc, id) => {
+      acc[id] = (acc[id] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  const duplicates = Object.entries(idCounts).filter(([, count]) => count > 1);
+
+  if (duplicates.length > 0) {
+    duplicates.forEach(([id]) => {
+      messages.push(
+        `The id "${id}" is repeated in the following directories:\n - "${Object.entries(pathIds)
+          .filter(([, test]) => test === id)
+          .map(([p]) => p)
+          .join('"\n - "')}"`,
+      );
+    });
+    return { messages, valid: false }; // Indicate error due to duplicates
+  }
+
+  // If we reach here, all IDs are valid and unique
+  return { messages, valid: true };
 }
