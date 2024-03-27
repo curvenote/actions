@@ -35,7 +35,8 @@ function reportSummary(report: Report) {
   );
 }
 
-function reportSummaryMessage(report: Report, buildUrl: string) {
+function reportSummaryMessage(report: Report | undefined, buildUrl: string) {
+  if (!report) return 'No checks ran';
   const summary = reportSummary(report);
   const total = summary.pass + summary.fail;
   if (total === 0) return 'No checks ran';
