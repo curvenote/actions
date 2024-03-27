@@ -28,9 +28,9 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.draft }}" = "true" ]; then
-          curvenote submit ${{ inputs.venue }} --kind ${{ inputs.kind }} --draft -y
+          curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" --draft -y
         else
-          curvenote submit ${{ inputs.venue }} --kind ${{ inputs.kind }} --key ${{ inputs.id }} -y
+          curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" --key ${{ inputs.id }} -y
         fi
     - name: Upload Curvenote Logs
       uses: actions/upload-artifact@v4
