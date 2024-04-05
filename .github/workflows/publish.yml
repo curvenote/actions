@@ -6,8 +6,14 @@ on:
         description: The site or venue that this project is being submitted to
         required: true
         type: string
+      collection:
+        description: The venue's collection that this project is being submitted to
+        type: string
       kind:
-        description: The kind of the submission
+        description: |
+          The kind of the submission
+
+          Available kinds are dependent on the venue and collection
         required: true
         type: string
       id-pattern-regex:
@@ -135,6 +141,7 @@ jobs:
         with:
           id: ${{ matrix.id }}
           venue: ${{ inputs.venue }}
+          collection: ${{ inputs.collection }}
           kind: ${{ inputs.kind }}
           working-directory: ${{ matrix.working-directory }}
           draft: ${{ matrix.draft }}

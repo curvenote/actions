@@ -6,7 +6,10 @@ branding:
   color: blue
 inputs:
   id:
-    description: The ID of the submission, used to maintain the submission history as well as store the logs on github
+    description: |
+      The ID of the submission, used to store the logs on github
+
+      This should match the submission id in the myst.yml project config
     required: true
   working-directory:
     description: Install typst for PDF rendering
@@ -14,6 +17,8 @@ inputs:
   venue:
     description: The site or venue that this project is being submitted to
     required: true
+  collection:
+    description: The venue's collection that this project is being submitted to
   kind:
     description: The kind of the submission
     required: true
@@ -28,10 +33,12 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.draft }}" = "true" ]; then
-          curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" --draft -y
-        else
-          curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" --key ${{ inputs.id }} -y
+          DRAFT="--draft"
         fi
+        if [ "${{ inputs.collection }}" ]
+          COLLECTION="--collection ${{ inputs.collection }}"
+        fi
+        curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION $DRAFT -y
     - name: Upload Curvenote Logs
       uses: actions/upload-artifact@v4
       with:
