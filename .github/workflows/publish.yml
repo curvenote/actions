@@ -159,7 +159,7 @@ jobs:
         with:
           typst: false
           images: false
-      - run: curvenote check
+      - run: curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}"
         working-directory: ${{ matrix.working-directory }}
   summary:
     needs:
