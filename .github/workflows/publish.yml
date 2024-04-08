@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       collection:
-        description: The venue's collection that this project is being submitted to
+        description: The venue's collection that this collection is being submitted to
         type: string
       kind:
         description: |
