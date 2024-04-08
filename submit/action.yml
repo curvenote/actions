@@ -36,7 +36,7 @@ runs:
           DRAFT="--draft"
         fi
         if [ -n "${{ inputs.collection }}" ]; then
-          COLLECTION="--collection \"${{ inputs.collection }}\""
+          COLLECTION="--collection ${{ inputs.collection }}"
         fi
         curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION $DRAFT -y
     - name: Upload Curvenote Logs
