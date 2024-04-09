@@ -5,6 +5,12 @@ branding:
   icon: package
   color: blue
 inputs:
+  changed-files:
+    description: |
+      A comma-separated list of changed files.
+
+      We recommend using https://github.com/tj-actions/changed-files
+    required: true
   monorepo:
     description: |
       Indicate that this repository contains multiple projects that should be published.

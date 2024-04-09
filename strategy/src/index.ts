@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-import { getChangedFiles } from './gitUtils.js';
 import { Octokit } from '@octokit/rest';
 import { getPullRequestLabels, getPullRequestReviewers } from './githubUtils.js';
 import {
@@ -32,7 +31,7 @@ import {
   const submitLabel = booleanOrLabels(core.getInput('submit-label'));
   const idPatternRegex = core.getInput('id-pattern-regex');
 
-  const changedFiles = await getChangedFiles();
+  const changedFiles = core.getInput('changed-files').split(',');
   const prLabels = await getPullRequestLabels(octokit);
   const rawEnforceSingleFolder = booleanOrLabels(core.getInput('enforce-single-folder'));
   const enforceSingleFolder =

@@ -113,22 +113,14 @@ jobs:
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v44
-        # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
-        # with:
-        #   since_last_remote_commit: true
-
-      - name: List all changed files
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-        run: |
-          for file in ${ALL_CHANGED_FILES}; do
-            echo "$file was changed"
-          done
+        with:
+          separator: ','
       - id: build-strategy
         uses: curvenote/actions/strategy@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB }}
         with:
+          changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
           monorepo: ${{ inputs.monorepo }}
           path: ${{ inputs.path }}
           enforce-single-folder: ${{ inputs.enforce-single-folder }}
