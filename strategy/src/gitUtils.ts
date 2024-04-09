@@ -29,7 +29,9 @@ async function fetchBranches(baseBranch: string, headBranch: string) {
 }
 
 async function getMergeBase(baseBranch: string, headBranch: string): Promise<string> {
-  // Compare the branches, and get the filename diff
+  core.debug(
+    `Create a merge-base commit hash between for head (${headBranch}) and base (${baseBranch})`,
+  );
   const { stdout, stderr } = await getExecOutput('git', ['merge-base', headBranch, baseBranch], {
     silent: !core.isDebug(),
   });
@@ -38,6 +40,8 @@ async function getMergeBase(baseBranch: string, headBranch: string): Promise<str
     console.error('Error getting merge-base:', stderr);
     throw new Error(`Failed to get merge-base: ${stderr}`);
   }
+
+  core.debug(`Merge Base is ${stdout}`);
 
   return stdout;
 }
@@ -49,7 +53,10 @@ export async function getChangedFiles(): Promise<string[]> {
 
   await fetchBranches(baseBranch, headBranch);
   // Create the target commit (excluding any changes in the base branch)
-  const mergeBase = await getMergeBase(baseBranch, headBranch);
+  const mergeBase = await getMergeBase(
+    process.env.GITHUB_BASE_REF as string,
+    process.env.GITHUB_HEAD_REF as string,
+  );
   core.debug(`The merge base is ${mergeBase}`);
   // Compare the branches, and get the filename diff
   const { stdout, stderr } = await getExecOutput(

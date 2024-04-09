@@ -35795,7 +35795,7 @@ async function fetchBranches(baseBranch, headBranch) {
     core.debug(`Head and target branches have been fetched.`);
 }
 async function getMergeBase(baseBranch, headBranch) {
-    // Compare the branches, and get the filename diff
+    core.debug(`Create a merge-base commit hash between for head (${headBranch}) and base (${baseBranch})`);
     const { stdout, stderr } = await (0,exec.getExecOutput)('git', ['merge-base', headBranch, baseBranch], {
         silent: !core.isDebug(),
     });
@@ -35803,6 +35803,7 @@ async function getMergeBase(baseBranch, headBranch) {
         console.error('Error getting merge-base:', stderr);
         throw new Error(`Failed to get merge-base: ${stderr}`);
     }
+    core.debug(`Merge Base is ${stdout}`);
     return stdout;
 }
 async function getChangedFiles() {
@@ -35811,7 +35812,7 @@ async function getChangedFiles() {
     const headBranch = `origin/${process.env.GITHUB_HEAD_REF}`;
     await fetchBranches(baseBranch, headBranch);
     // Create the target commit (excluding any changes in the base branch)
-    const mergeBase = await getMergeBase(baseBranch, headBranch);
+    const mergeBase = await getMergeBase(process.env.GITHUB_BASE_REF, process.env.GITHUB_HEAD_REF);
     core.debug(`The merge base is ${mergeBase}`);
     // Compare the branches, and get the filename diff
     const { stdout, stderr } = await (0,exec.getExecOutput)('git', ['diff', '--name-only', headBranch, mergeBase], { silent: !core.isDebug() });
