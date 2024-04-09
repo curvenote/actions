@@ -35778,20 +35778,8 @@ var exec = __nccwpck_require__(110);
 
 async function fetchBranches(baseBranch, headBranch) {
     core.debug(`Fetching branches for base (${baseBranch}) and head (${headBranch})`);
-    await (0,exec.getExecOutput)('git', [
-        'fetch',
-        '--no-tags',
-        '--depth=1',
-        'origin',
-        `${process.env.GITHUB_BASE_REF}:refs/remotes/${baseBranch}`,
-    ], { silent: !core.isDebug() });
-    await (0,exec.getExecOutput)('git', [
-        'fetch',
-        '--no-tags',
-        '--depth=1',
-        'origin',
-        `${process.env.GITHUB_HEAD_REF}:refs/remotes/${headBranch}`,
-    ], { silent: !core.isDebug() });
+    await (0,exec.getExecOutput)('git', ['fetch', '--no-tags', '--depth=1', 'origin', `${process.env.GITHUB_BASE_REF}:${baseBranch}`], { silent: !core.isDebug() });
+    await (0,exec.getExecOutput)('git', ['fetch', '--no-tags', '--depth=1', 'origin', `${process.env.GITHUB_HEAD_REF}:${headBranch}`], { silent: !core.isDebug() });
     core.debug(`Head and target branches have been fetched.`);
 }
 async function getMergeBase(baseBranch, headBranch) {
@@ -35803,17 +35791,17 @@ async function getMergeBase(baseBranch, headBranch) {
         console.error('Error getting merge-base:', stderr);
         throw new Error(`Failed to get merge-base: ${stderr}`);
     }
-    core.debug(`Merge Base is ${stdout}`);
+    core.debug(`The merge base is ${stdout}`);
     return stdout;
 }
 async function getChangedFiles() {
     // Use environment variables to dynamically refer to branches in the PR
-    const baseBranch = `origin/${process.env.GITHUB_BASE_REF}`;
-    const headBranch = `origin/${process.env.GITHUB_HEAD_REF}`;
+    const baseBranch = `refs/remotes/origin/${process.env.GITHUB_BASE_REF}`;
+    const headBranch = `refs/remotes/origin/${process.env.GITHUB_HEAD_REF}`;
     await fetchBranches(baseBranch, headBranch);
     // Create the target commit (excluding any changes in the base branch)
-    const mergeBase = await getMergeBase(process.env.GITHUB_BASE_REF, process.env.GITHUB_HEAD_REF);
-    core.debug(`The merge base is ${mergeBase}`);
+    const mergeBase = await getMergeBase(baseBranch, headBranch);
+    core.debug(`Comparing the branch ${headBranch} with ${mergeBase}`);
     // Compare the branches, and get the filename diff
     const { stdout, stderr } = await (0,exec.getExecOutput)('git', ['diff', '--name-only', headBranch, mergeBase], { silent: !core.isDebug() });
     if (stderr) {
