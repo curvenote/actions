@@ -35775,27 +35775,29 @@ var core = __nccwpck_require__(5316);
 var exec = __nccwpck_require__(110);
 ;// CONCATENATED MODULE: ./src/gitUtils.ts
 
+
 async function fetchBranches(baseBranch, headBranch) {
-    // Fetch the two branches explicitly
+    core.debug(`Fetching branches for base (${baseBranch}) and head (${headBranch})`);
     await (0,exec.getExecOutput)('git', [
         'fetch',
         '--no-tags',
         '--depth=1',
         'origin',
         `${process.env.GITHUB_BASE_REF}:refs/remotes/${baseBranch}`,
-    ], { silent: true });
+    ], { silent: !core.isDebug() });
     await (0,exec.getExecOutput)('git', [
         'fetch',
         '--no-tags',
         '--depth=1',
         'origin',
         `${process.env.GITHUB_HEAD_REF}:refs/remotes/${headBranch}`,
-    ], { silent: true });
+    ], { silent: !core.isDebug() });
+    core.debug(`Head and target branches have been fetched.`);
 }
 async function getMergeBase(baseBranch, headBranch) {
     // Compare the branches, and get the filename diff
     const { stdout, stderr } = await (0,exec.getExecOutput)('git', ['merge-base', headBranch, baseBranch], {
-        silent: true,
+        silent: !core.isDebug(),
     });
     if (stderr) {
         console.error('Error getting merge-base:', stderr);
@@ -35810,8 +35812,9 @@ async function getChangedFiles() {
     await fetchBranches(baseBranch, headBranch);
     // Create the target commit (excluding any changes in the base branch)
     const mergeBase = await getMergeBase(baseBranch, headBranch);
+    core.debug(`The merge base is ${mergeBase}`);
     // Compare the branches, and get the filename diff
-    const { stdout, stderr } = await (0,exec.getExecOutput)('git', ['diff', '--name-only', headBranch, mergeBase], { silent: true });
+    const { stdout, stderr } = await (0,exec.getExecOutput)('git', ['diff', '--name-only', headBranch, mergeBase], { silent: !core.isDebug() });
     if (stderr) {
         console.error('Error getting changed files:', stderr);
         throw new Error(`Failed to get changed files: ${stderr}`);

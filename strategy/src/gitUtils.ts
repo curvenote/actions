@@ -1,7 +1,8 @@
+import * as core from '@actions/core';
 import { getExecOutput } from '@actions/exec';
 
 async function fetchBranches(baseBranch: string, headBranch: string) {
-  // Fetch the two branches explicitly
+  core.debug(`Fetching branches for base (${baseBranch}) and head (${headBranch})`);
   await getExecOutput(
     'git',
     [
@@ -11,7 +12,7 @@ async function fetchBranches(baseBranch: string, headBranch: string) {
       'origin',
       `${process.env.GITHUB_BASE_REF}:refs/remotes/${baseBranch}`,
     ],
-    { silent: true },
+    { silent: !core.isDebug() },
   );
   await getExecOutput(
     'git',
@@ -22,14 +23,15 @@ async function fetchBranches(baseBranch: string, headBranch: string) {
       'origin',
       `${process.env.GITHUB_HEAD_REF}:refs/remotes/${headBranch}`,
     ],
-    { silent: true },
+    { silent: !core.isDebug() },
   );
+  core.debug(`Head and target branches have been fetched.`);
 }
 
 async function getMergeBase(baseBranch: string, headBranch: string): Promise<string> {
   // Compare the branches, and get the filename diff
   const { stdout, stderr } = await getExecOutput('git', ['merge-base', headBranch, baseBranch], {
-    silent: true,
+    silent: !core.isDebug(),
   });
 
   if (stderr) {
@@ -48,11 +50,12 @@ export async function getChangedFiles(): Promise<string[]> {
   await fetchBranches(baseBranch, headBranch);
   // Create the target commit (excluding any changes in the base branch)
   const mergeBase = await getMergeBase(baseBranch, headBranch);
+  core.debug(`The merge base is ${mergeBase}`);
   // Compare the branches, and get the filename diff
   const { stdout, stderr } = await getExecOutput(
     'git',
     ['diff', '--name-only', headBranch, mergeBase],
-    { silent: true },
+    { silent: !core.isDebug() },
   );
 
   if (stderr) {
