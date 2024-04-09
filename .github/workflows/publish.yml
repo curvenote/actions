@@ -167,6 +167,8 @@ jobs:
           images: false
       - run: curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}"
         working-directory: ${{ matrix.working-directory }}
+        env:
+          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
   summary:
     needs:
       - strategy
