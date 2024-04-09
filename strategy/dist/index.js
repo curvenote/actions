@@ -38517,11 +38517,13 @@ async function resolvePaths(baseDir, pattern) {
  */
 function filterPathsAndIdentifyUnknownChanges(paths, changedFiles) {
     // Extract base paths from changedFiles
-    const basePaths = changedFiles.map((file) => {
+    const basePaths = changedFiles
+        .map((file) => {
         const parts = file.split('/');
         parts.pop(); // Remove the file name, keep the directory path
         return parts.join('/'); // Rejoin to form the base path
-    });
+    })
+        .filter((p) => !!p);
     // Deduplicate basePaths
     const uniqueBasePaths = Array.from(new Set(basePaths));
     // Filter paths that are included in the basePaths from changedFiles

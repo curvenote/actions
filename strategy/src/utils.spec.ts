@@ -66,6 +66,15 @@ describe('utility tests', () => {
       filteredPaths: ['posters/poster-1', 'posters/poster-2'],
       unknownChangedFiles: ['.git/temp.bin'],
     });
+    expect(
+      filterPathsAndIdentifyUnknownChanges(
+        ['posters/poster-1', 'posters/poster-2'],
+        ['README.md', 'folder/README.md'],
+      ),
+    ).toEqual({
+      filteredPaths: [],
+      unknownChangedFiles: ['README.md', 'folder/README.md'],
+    });
   });
 
   it('getIdsFromPaths', async () => {
