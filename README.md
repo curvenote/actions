@@ -98,6 +98,6 @@ jobs:
 
 ### Secrets
 
-A curvenote API token is required. This can be added as a secret within your [GitHub Repository or Environment](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions). 
+A Curvenote API token is required. This can be added as a secret within your [GitHub Repository or Environment](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions). 
 
 An API Token can be generated for any user account at [curvenote.com](https://curvenote.com/profile?settings=true&tab=profile-api&subtab=general), the user account used must be on the Team a associated with your site and have suffient rights.
