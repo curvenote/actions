@@ -91,6 +91,9 @@ on:
         required: false
         default: ready
         type: string
+      ref:
+        description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, uses the default branch.
+        type: string
     secrets:
       GITHUB:
         description: GitHub API token (usually `env.GITHUB_TOKEN`)
@@ -110,6 +113,9 @@ jobs:
       matrix: ${{ steps.build-strategy.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 1
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v44
@@ -139,6 +145,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.ref }}
           fetch-depth: 1
       - uses: curvenote/actions/setup@main
       - uses: curvenote/actions/submit@main
@@ -160,6 +167,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.ref }}
           fetch-depth: 1
       - uses: curvenote/actions/setup@main
         with:
