@@ -137,9 +137,15 @@ export function ensureUniqueAndValidIds(
     const valid =
       !!id && !!id.match(new RegExp(idPatternRegex)) && !!id.match(/^([a-zA-Z0-9_-]+)$/);
     if (!valid) {
-      messages.push(
-        `Invalid id for path "${p}" (ID: \`${id}\`):\n - Must not be null or empty\n - Must match id-pattern-regex: /${idPatternRegex}/\n - Only includes "a-z A-Z 0-9 - _"\nUpdate ${p}/myst.yml to include a valid project.id`,
-      );
+      if (!loadConfig(p)) {
+        messages.push(
+          `No config file present for path "${p}"\nCreate ${p}/myst.yml and ensure it includes a valid project.id`,
+        );
+      } else {
+        messages.push(
+          `Invalid id for path "${p}" (ID: \`${id}\`):\n - Must not be null or empty\n - Must match id-pattern-regex: /${idPatternRegex}/\n - Only includes "a-z A-Z 0-9 - _"\nUpdate ${p}/myst.yml to include a valid project.id`,
+        );
+      }
     }
     return allValid && valid;
   }, true);

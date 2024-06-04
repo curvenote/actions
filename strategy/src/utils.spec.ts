@@ -133,6 +133,17 @@ describe('utility tests', () => {
     });
   });
 
+  it('getIdsFromPaths - no myst.yml', async () => {
+    memfs.vol.fromJSON({
+      'papers/paper-1/index.md': '',
+    });
+    const paths = await resolvePaths('.', 'papers/*');
+    expect(paths).toEqual(['papers/paper-1']);
+    expect(getIdsFromPaths(paths)).toEqual({
+      'papers/paper-1': null,
+    });
+  });
+
   it.each([
     [
       'valid',
