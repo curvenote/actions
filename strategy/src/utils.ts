@@ -66,18 +66,18 @@ export async function resolvePaths(baseDir: string, pattern: string): Promise<st
 /**
  * Filter the paths by the changed files, and mention any unknown changed files.
  *
- * @param paths The directories that are expected to have changes in them
+ * @param allowedPaths The directories that are expected to have changes in them
  * @param changedFiles The list of changed files
  * @returns
- *   `filteredPaths`: Paths from your input that have corresponding changes in changedFiles.
- *   `unknownChangedFiles`: Files that were changed but don't fall under the directories specified by your paths input.
+ *   `filteredPaths`: Allowed paths from your input that have corresponding changes in changedFiles.
+ *   `unknownChangedFiles`: Files that were changed but don't fall under the directories specified by your allowed paths input.
  */
 export function filterPathsAndIdentifyUnknownChanges(
-  paths: string[],
+  allowedPaths: string[],
   changedFiles: string[],
 ): { filteredPaths: string[]; unknownChangedFiles: string[] } {
   // Extract base paths from changedFiles
-  const basePaths = changedFiles
+  const changedPaths = changedFiles
     .map((file) => {
       const parts = file.split('/');
       parts.pop(); // Remove the file name, keep the directory path
@@ -85,18 +85,18 @@ export function filterPathsAndIdentifyUnknownChanges(
     })
     .filter((p) => !!p);
 
-  // Deduplicate basePaths
-  const uniqueBasePaths = Array.from(new Set(basePaths));
+  // Deduplicate changedPaths
+  const uniqueChangedPaths = Array.from(new Set(changedPaths));
 
-  // Filter paths that are included in the basePaths from changedFiles
-  const filteredPaths = paths.filter((p) =>
-    uniqueBasePaths.some((basePath) => p.startsWith(basePath)),
+  // Filter allowedPaths that are included in the changedPaths
+  const filteredPaths = allowedPaths.filter((allowed) =>
+    uniqueChangedPaths.some((changed) => changed.startsWith(allowed)),
   );
 
   // Identify changed files that are outside the specified paths
-  const unknownChangedFiles = changedFiles.filter((file) => {
+  const unknownChangedFiles = changedFiles.filter((changed) => {
     // Check if this file's base path does not start with any of the paths
-    return !paths.some((p) => file.startsWith(p));
+    return !allowedPaths.some((allowed) => changed.startsWith(allowed));
   });
 
   return { filteredPaths, unknownChangedFiles };

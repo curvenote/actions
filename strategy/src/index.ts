@@ -83,7 +83,7 @@ import {
 
   if (enforceSingleFolder && filteredPaths.length > 1) {
     core.setFailed(
-      `The strategy is set to fail when changes are made outside of the single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
+      `The strategy is set to fail when changes are made outside of a single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
 There are changes in multiple folders:
   - ${filteredPaths.join('\n  - ')}`,
     );
@@ -91,8 +91,8 @@ There are changes in multiple folders:
   }
   if (enforceSingleFolder && unknownChangedFiles.length > 0) {
     core.setFailed(
-      `The strategy is set to fail when changes are made outside of the single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
-There are changes in:
+      `The strategy is set to fail when changes are made outside of a single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
+These files are outside of an allowed folder path:
   - ${unknownChangedFiles.join('\n  - ')}`,
     );
     return;

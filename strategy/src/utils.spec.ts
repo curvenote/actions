@@ -47,7 +47,7 @@ describe('utility tests', () => {
     expect(await resolvePaths('posters', '*')).toEqual(['posters/poster-1', 'posters/poster-2']);
   });
 
-  it('filterPathsAndIdentifyUnknownChanges', () => {
+  it('filterPathsAndIdentifyUnknownChanges - select correct path', () => {
     expect(
       filterPathsAndIdentifyUnknownChanges(
         ['posters/poster-1', 'posters/poster-2'],
@@ -57,10 +57,25 @@ describe('utility tests', () => {
       filteredPaths: ['posters/poster-1'],
       unknownChangedFiles: [],
     });
+  });
+
+  it('filterPathsAndIdentifyUnknownChanges - ignore other files', () => {
     expect(
       filterPathsAndIdentifyUnknownChanges(
         ['posters/poster-1', 'posters/poster-2'],
-        ['posters/poster-1/temp.tex', 'posters/poster-2/temp.tex', '.git/temp.bin'],
+        ['posters/poster-1/temp.tex', '.git/temp.bin'],
+      ),
+    ).toEqual({
+      filteredPaths: ['posters/poster-1'],
+      unknownChangedFiles: ['.git/temp.bin'],
+    });
+  });
+
+  it('filterPathsAndIdentifyUnknownChanges - multiple paths returned', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(
+        ['posters/poster-1', 'posters/poster-2'],
+        ['posters/poster-1/temp.tex', 'posters/poster-2/subfolder/temp.tex', '.git/temp.bin'],
       ),
     ).toEqual({
       filteredPaths: ['posters/poster-1', 'posters/poster-2'],
@@ -74,6 +89,34 @@ describe('utility tests', () => {
     ).toEqual({
       filteredPaths: [],
       unknownChangedFiles: ['README.md', 'folder/README.md'],
+    });
+  });
+
+  it('filterPathsAndIdentifyUnknownChanges - duplicate paths are deduped', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(
+        ['posters/poster-1', 'posters/poster-2'],
+        [
+          'posters/poster-1/temp.tex',
+          'posters/poster-2/subfolder/temp.tex',
+          'posters/poster-2/image.png',
+          '.git/temp.bin',
+        ],
+      ),
+    ).toEqual({
+      filteredPaths: ['posters/poster-1', 'posters/poster-2'],
+      unknownChangedFiles: ['.git/temp.bin'],
+    });
+  });
+  it('filterPathsAndIdentifyUnknownChanges - invalid paths are not part of filtered results', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(
+        ['posters/poster-1', 'posters/poster-2'],
+        ['posters/temp.tex', '.git/temp.bin'],
+      ),
+    ).toEqual({
+      filteredPaths: [],
+      unknownChangedFiles: ['posters/temp.tex', '.git/temp.bin'],
     });
   });
 
