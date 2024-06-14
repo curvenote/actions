@@ -16,7 +16,7 @@ jobs:
           git checkout -b release/PR${{ github.event.number }}
       - name: Bump version
         run: |
-          sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/publish.yml
+          sed -i s/@main/@PR${{ github.event.number }}/g publish/action.yml
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
           git commit -am "🧪 PR${{ github.event.number }}"
@@ -29,4 +29,4 @@ jobs:
       - name: Comment on PR
         uses: curvenote/actions/upsert-comment@v1
         with:
-          comment: 'Test this pull request: curvenote/actions/.github/workflows/publish.yml@PR${{ github.event.number }}'
+          comment: 'Test this pull request: curvenote/actions/publish@PR${{ github.event.number }}'
