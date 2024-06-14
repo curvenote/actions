@@ -1,0 +1,30 @@
+name: PR Test Release
+on:
+  pull_request:
+    branches:
+      - main
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout temporary branch
+        run: |
+          git checkout -b release/PR${{ github.event.number }}
+      - name: Bump version
+        run: |
+          sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/publish/action.yml
+          git commit -m "🧪 PR${{ github.event.number }}"
+      - name: Tag version
+        run: |
+          git tag PR${{ github.event.number }} --force
+      - name: Push tags
+        run: |
+          git push origin --tags --force
+      - name: Comment on PR
+        uses: curvenote/actions/upsert-comment@PR${{ github.event.number }}
+        with:
+          comment: 'Test this pull request: curvenote/actions/.github/workflows/publish.yml@PR${{ github.event.number }}'
