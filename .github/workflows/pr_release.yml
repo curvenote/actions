@@ -25,6 +25,6 @@ jobs:
         run: |
           git push origin --tags --force
       - name: Comment on PR
-        uses: curvenote/actions/upsert-comment@PR${{ github.event.number }}
+        uses: curvenote/actions/upsert-comment@v1
         with:
           comment: 'Test this pull request: curvenote/actions/.github/workflows/publish.yml@PR${{ github.event.number }}'
