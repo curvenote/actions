@@ -16,7 +16,7 @@ jobs:
           git checkout -b release/PR${{ github.event.number }}
       - name: Bump version
         run: |
-          sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/publish/action.yml
+          sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/publish.yml
           git commit -m "🧪 PR${{ github.event.number }}"
       - name: Tag version
         run: |
