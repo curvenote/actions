@@ -53,6 +53,9 @@ jobs:
           git tag ${{ needs.prepare.outputs.version }}
           git tag `cut -d "." -f -2 <<< ${{ needs.prepare.outputs.version }}` --force
           git tag `cut -d "." -f -1 <<< ${{ needs.prepare.outputs.version }}` --force
+      - name: List tags
+        run: |
+          git tag -l
       # - name: Push tags
       #   run: |
       #     git push origin --tags --force
