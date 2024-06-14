@@ -17,7 +17,9 @@ jobs:
       - name: Bump version
         run: |
           sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/publish.yml
-          git commit -m "🧪 PR${{ github.event.number }}"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+          git commit -am "🧪 PR${{ github.event.number }}"
       - name: Tag version
         run: |
           git tag PR${{ github.event.number }} --force
