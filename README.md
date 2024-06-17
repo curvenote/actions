@@ -16,7 +16,7 @@ permissions:
   pull-requests: write
 jobs:
   publish:
-    uses: curvenote/actions/publish@v1
+    uses: curvenote/actions/.github/workflows/publish.yml@v1
     with:
       monorepo: true
       id-pattern-regex: '^<MYJOURNAL-COLLECTION>-(?:[a-zA-Z0-9-_]{3,15})$'

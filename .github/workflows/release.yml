@@ -1,10 +1,11 @@
 name: Release
-
 on:
   push:
     branches:
       - main
-
+permissions:
+  contents: write
+  actions: write
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -38,6 +39,11 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.release == 'yes'
     steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -46,10 +52,18 @@ jobs:
           git checkout -b release/${{ needs.prepare.outputs.version }}
       - name: Stamp version into publish action
         run: |
-          sed -i s/@main/@${{ needs.prepare.outputs.version }}/g publish/action.yml
+          sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/publish.yml
+      - name: Build dist content
+        run: |
+          npm install
+          npm run build
+      - name: Commit changes
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
-          git commit -am "🚀 ${{ needs.prepare.outputs.version }}"
+          git add .github/workflows/publish.yml
+          git add -f strategy/dist
+          git add -f submit-summary/dist
+          git commit -m "🚀 ${{ needs.prepare.outputs.version }}"
       - name: Tag version
         run: |
           git tag ${{ needs.prepare.outputs.version }}

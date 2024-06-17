@@ -6,20 +6,34 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
       - uses: actions/checkout@v4
       - name: Checkout temporary branch
         run: |
           git checkout -b release/PR${{ github.event.number }}
       - name: Stamp version into publish action
         run: |
-          sed -i s/@main/@PR${{ github.event.number }}/g publish/action.yml
+          sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/publish.yml
+      - name: Build dist content
+        run: |
+          npm install
+          npm run build
+      - name: Commit changes
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
-          git commit -am "🧪 PR${{ github.event.number }}"
+          git add .github/workflows/publish.yml
+          git add -f strategy/dist
+          git add -f submit-summary/dist
+          git commit -m "🧪 PR${{ github.event.number }}"
       - name: Tag version
         run: |
           git tag PR${{ github.event.number }} --force
@@ -32,11 +46,11 @@ jobs:
           comment: |
             You may test this pull request by updating your action:
 
-            ```yaml .github/workflows/publish.yml
+            ```yaml
             ...
             jobs:
               publish:
-                uses: curvenote/actions/publish@PR${{ github.event.number }}'
+                uses: curvenote/actions/.github/workflows/publish.yml@PR${{ github.event.number }}
               with:
                 ...
             ```
