@@ -9,6 +9,7 @@ permissions:
   actions: write
 jobs:
   release:
+    name: Create PR Release
     runs-on: ubuntu-latest
     steps:
       - name: Setup Node.js

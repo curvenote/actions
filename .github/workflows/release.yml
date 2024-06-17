@@ -8,6 +8,7 @@ permissions:
   actions: write
 jobs:
   prepare:
+    name: Decide if Versioned Release is Required
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get-version.outputs.version }}
@@ -34,7 +35,44 @@ jobs:
               echo "release=no" >> "$GITHUB_OUTPUT"
             fi
           fi
+  latest:
+    name: Create Latest Release
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Checkout temporary branch
+        run: |
+          git checkout -b release/latest
+      - name: Stamp latest into publish action
+        run: |
+          sed -i s/@main/@latest/g .github/workflows/publish.yml
+      - name: Build dist content
+        run: |
+          npm install
+          npm run build
+      - name: Commit changes
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+          git add .github/workflows/publish.yml
+          git add -f strategy/dist
+          git add -f submit-summary/dist
+          git commit -m "🔧 Latest"
+      - name: Tag version
+        run: |
+          git tag latest --force
+      - name: Push tags
+        run: |
+          git push origin --tags --force
   release:
+    name: Create Versioned Release
     runs-on: ubuntu-latest
     needs: prepare
     if: needs.prepare.outputs.release == 'yes'
