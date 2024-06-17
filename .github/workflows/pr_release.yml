@@ -12,12 +12,12 @@ jobs:
     name: Create PR Release
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
-      - uses: actions/checkout@v4
       - name: Checkout temporary branch
         run: |
           git checkout -b release/PR${{ github.event.number }}
