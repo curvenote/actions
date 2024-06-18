@@ -137,7 +137,7 @@ jobs:
     needs: strategy
     runs-on: ubuntu-latest
     concurrency:
-      group: preview-${{ github.repository }}-${{ github.ref }}
+      group: preview-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}
       cancel-in-progress: true
     if: ${{ needs.strategy.outputs.preview == 'true'}}
     strategy:
