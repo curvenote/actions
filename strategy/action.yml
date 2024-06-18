@@ -94,4 +94,5 @@ outputs:
       Each step will include:
 
       - `id`: The local identifier for the submission job (only used between github actions)
-      - `working-directory`: The directory that the step should complete in.
+      - `working-directory`: The directory that the step should complete in
+      - `draft`: True if submission should be made as a draft
