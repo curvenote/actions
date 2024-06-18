@@ -47,7 +47,7 @@ describe('utility tests', () => {
     expect(await resolvePaths('posters', '*')).toEqual(['posters/poster-1', 'posters/poster-2']);
   });
 
-  it('filterPathsAndIdentifyUnknownChanges', () => {
+  it('filterPathsAndIdentifyUnknownChanges - select correct path', () => {
     expect(
       filterPathsAndIdentifyUnknownChanges(
         ['posters/poster-1', 'posters/poster-2'],
@@ -57,10 +57,25 @@ describe('utility tests', () => {
       filteredPaths: ['posters/poster-1'],
       unknownChangedFiles: [],
     });
+  });
+
+  it('filterPathsAndIdentifyUnknownChanges - ignore other files', () => {
     expect(
       filterPathsAndIdentifyUnknownChanges(
         ['posters/poster-1', 'posters/poster-2'],
-        ['posters/poster-1/temp.tex', 'posters/poster-2/temp.tex', '.git/temp.bin'],
+        ['posters/poster-1/temp.tex', '.git/temp.bin'],
+      ),
+    ).toEqual({
+      filteredPaths: ['posters/poster-1'],
+      unknownChangedFiles: ['.git/temp.bin'],
+    });
+  });
+
+  it('filterPathsAndIdentifyUnknownChanges - multiple paths returned', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(
+        ['posters/poster-1', 'posters/poster-2'],
+        ['posters/poster-1/temp.tex', 'posters/poster-2/subfolder/temp.tex', '.git/temp.bin'],
       ),
     ).toEqual({
       filteredPaths: ['posters/poster-1', 'posters/poster-2'],
@@ -77,6 +92,34 @@ describe('utility tests', () => {
     });
   });
 
+  it('filterPathsAndIdentifyUnknownChanges - duplicate paths are deduped', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(
+        ['posters/poster-1', 'posters/poster-2'],
+        [
+          'posters/poster-1/temp.tex',
+          'posters/poster-2/subfolder/temp.tex',
+          'posters/poster-2/image.png',
+          '.git/temp.bin',
+        ],
+      ),
+    ).toEqual({
+      filteredPaths: ['posters/poster-1', 'posters/poster-2'],
+      unknownChangedFiles: ['.git/temp.bin'],
+    });
+  });
+  it('filterPathsAndIdentifyUnknownChanges - invalid paths are not part of filtered results', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(
+        ['posters/poster-1', 'posters/poster-2'],
+        ['posters/temp.tex', '.git/temp.bin'],
+      ),
+    ).toEqual({
+      filteredPaths: [],
+      unknownChangedFiles: ['posters/temp.tex', '.git/temp.bin'],
+    });
+  });
+
   it('getIdsFromPaths', async () => {
     memfs.vol.fromJSON({
       'papers/paper-1/curvenote.yml': 'project:\n  id: project-1',
@@ -87,6 +130,17 @@ describe('utility tests', () => {
     expect(getIdsFromPaths(paths)).toEqual({
       'papers/paper-1': 'project-1',
       'papers/paper-2': 'project-2',
+    });
+  });
+
+  it('getIdsFromPaths - no myst.yml', async () => {
+    memfs.vol.fromJSON({
+      'papers/paper-1/index.md': '',
+    });
+    const paths = await resolvePaths('.', 'papers/*');
+    expect(paths).toEqual(['papers/paper-1']);
+    expect(getIdsFromPaths(paths)).toEqual({
+      'papers/paper-1': null,
     });
   });
 

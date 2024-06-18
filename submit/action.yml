@@ -12,7 +12,7 @@ inputs:
       This should match the submission id in the myst.yml project config
     required: true
   working-directory:
-    description: Install typst for PDF rendering
+    description: Root directory of project with myst.yml
     required: true
   venue:
     description: The site or venue that this project is being submitted to
