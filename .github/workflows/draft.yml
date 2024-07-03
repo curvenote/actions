@@ -1,0 +1,175 @@
+name: draft
+on:
+  workflow_call:
+    inputs:
+      venue:
+        description: The site or venue that this project is being submitted to
+        required: true
+        type: string
+      collection:
+        description: The venue's collection that this collection is being submitted to
+        type: string
+      kind:
+        description: |
+          The kind of the submission
+
+          Available kinds are dependent on the venue and collection
+        required: true
+        type: string
+      id-pattern-regex:
+        description: |
+          A regular expression that all IDs must follow, by default this matches a UUID.
+
+          This can be used to enforce that all project IDs follow a specific pattern, such as,
+          the conference name + year.
+
+          The ID must also satisfy alphanumeric characters, dashes, and underscores.
+        type: string
+        default: '^([a-zA-Z0-9-]{36})$'
+      monorepo:
+        description: |
+          Indicate that this repository contains multiple projects that should be published.
+
+          For example, if you have multiple articles, or tutorials that should be previewed
+          and submitted when there are changes in the repository.
+        required: false
+        default: false
+        type: boolean
+      path:
+        description: |
+          The root directory path(s) where the Curvenote CLI will be invoked.
+          If `multiple` paths are being used, separate the `path` string with ','.
+          The paths can also be glob-like patterns (but only one `*`), for example:
+
+          ```yaml
+          path: my/project
+          path: my/paper, my/poster
+          path: papers/*, posters/*
+          ```
+
+          The default path is the root of the repository.
+        required: false
+        default: '.'
+        type: string
+      enforce-single-folder:
+        description: |
+          When true, an error will be raised if a pull-request is touching multiple
+          different folders. This can either be `true` or a label string.
+          Multiple labels can be added with comma-separated values.
+
+          If labels are used to control this property, the pull request will only fail in
+          PRs with these labels.
+
+          This can be used in conjunction with the `preview-label`, for example, if they
+          are both `paper` then the PRs with those labels will be required to only make changes
+          in a single folder and will not be previewed if that condition fails.
+          However, you can add additional preview labels, e.g. `all-papers`, which will build
+          previews for all papers, as the single folder condition is not enforced for that label.
+        required: false
+        default: 'false'
+        type: string
+      ref:
+        description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, uses the default branch.
+        type: string
+    secrets:
+      GITHUB:
+        description: GitHub API token (usually `env.GITHUB_TOKEN`)
+        required: true
+      CURVENOTE:
+        description: Curvenote API token (usually `secrets.CURVENOTE_TOKEN`)
+        required: true
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  strategy:
+    runs-on: ubuntu-latest
+    outputs:
+      check: ${{ steps.build-strategy.outputs.check }}
+      preview: ${{ steps.build-strategy.outputs.preview }}
+      matrix: ${{ steps.build-strategy.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 1
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          separator: ','
+      - id: build-strategy
+        uses: curvenote/actions/strategy@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB }}
+        with:
+          changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
+          monorepo: ${{ inputs.monorepo }}
+          path: ${{ inputs.path }}
+          enforce-single-folder: ${{ inputs.enforce-single-folder }}
+          id-pattern-regex: ${{ inputs.id-pattern-regex }}
+  submit-draft:
+    needs: strategy
+    runs-on: ubuntu-latest
+    concurrency:
+      group: preview-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}
+      cancel-in-progress: true
+    if: ${{ needs.strategy.outputs.preview == 'true'}}
+    strategy:
+      matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 1
+      - uses: curvenote/actions/setup@main
+      - uses: curvenote/actions/submit@main
+        env:
+          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
+        with:
+          id: ${{ matrix.id }}
+          venue: ${{ inputs.venue }}
+          collection: ${{ inputs.collection }}
+          kind: ${{ inputs.kind }}
+          working-directory: ${{ matrix.working-directory }}
+          draft: true
+  check:
+    needs: strategy
+    runs-on: ubuntu-latest
+    if: ${{ needs.strategy.outputs.check == 'true'}}
+    strategy:
+      matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 1
+      - uses: curvenote/actions/setup@main
+        with:
+          typst: false
+          images: false
+      # Note, the collection shouldn't be necessary:
+      - run: |
+          if [ -n "${{ inputs.collection }}" ]; then
+            COLLECTION="--collection ${{ inputs.collection }}"
+          fi
+          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION
+        working-directory: ${{ matrix.working-directory }}
+        env:
+          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
+  summary:
+    if: github.event_name == 'pull_request'
+    needs:
+      - strategy
+      - preview
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
+    steps:
+      - uses: curvenote/actions/submit-summary@main
+        id: summary
+        with:
+          matrix: '${{ needs.strategy.outputs.matrix }}'
+      - uses: curvenote/actions/upsert-comment@main
+        with:
+          comment: '${{ steps.summary.outputs.comment }}'
