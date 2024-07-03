@@ -22,9 +22,10 @@ jobs:
       - name: Checkout temporary branch
         run: |
           git checkout -b release/PR${{ github.event.number }}
-      - name: Stamp version into publish action
+      - name: Stamp version into workflows
         run: |
           sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/publish.yml
+          sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/draft.yml
       - name: Build dist content
         run: |
           npm install
@@ -34,6 +35,7 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
           git add .github/workflows/publish.yml
+          git add .github/workflows/draft.yml
           git add -f strategy/dist
           git add -f submit-summary/dist
           git commit -m "🧪 PR${{ github.event.number }}"

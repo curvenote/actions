@@ -49,9 +49,10 @@ jobs:
       - name: Checkout temporary branch
         run: |
           git checkout -b release/latest
-      - name: Stamp latest into publish action
+      - name: Stamp latest into workflows
         run: |
           sed -i s/@main/@latest/g .github/workflows/publish.yml
+          sed -i s/@main/@latest/g .github/workflows/draft.yml
       - name: Build dist content
         run: |
           npm install
@@ -61,6 +62,7 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
           git add .github/workflows/publish.yml
+          git add .github/workflows/draft.yml
           git add -f strategy/dist
           git add -f submit-summary/dist
           git commit -m "🔧 Latest"
@@ -89,9 +91,10 @@ jobs:
       - name: Checkout temporary branch
         run: |
           git checkout -b release/${{ needs.prepare.outputs.version }}
-      - name: Stamp version into publish action
+      - name: Stamp version into workflows
         run: |
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/publish.yml
+          sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/draft.yml
       - name: Build dist content
         run: |
           npm install
@@ -101,6 +104,7 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
           git add .github/workflows/publish.yml
+          git add .github/workflows/draft.yml
           git add -f strategy/dist
           git add -f submit-summary/dist
           git commit -m "🚀 ${{ needs.prepare.outputs.version }}"
