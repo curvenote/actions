@@ -112,7 +112,7 @@ jobs:
     needs: strategy
     runs-on: ubuntu-latest
     concurrency:
-      group: preview-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}
+      group: submit-draft-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}
       cancel-in-progress: true
     if: ${{ needs.strategy.outputs.preview == 'true'}}
     strategy:
@@ -161,7 +161,7 @@ jobs:
     if: github.event_name == 'pull_request'
     needs:
       - strategy
-      - preview
+      - submit-draft
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
