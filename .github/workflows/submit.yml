@@ -78,9 +78,6 @@ on:
       CURVENOTE:
         description: Curvenote API token (usually `secrets.CURVENOTE_TOKEN`)
         required: true
-permissions:
-  contents: read
-  pull-requests: write
 jobs:
   strategy:
     runs-on: ubuntu-latest
