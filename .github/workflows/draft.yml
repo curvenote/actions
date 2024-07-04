@@ -26,15 +26,6 @@ on:
           The ID must also satisfy alphanumeric characters, dashes, and underscores.
         type: string
         default: '^([a-zA-Z0-9-]{36})$'
-      monorepo:
-        description: |
-          Indicate that this repository contains multiple projects that should be published.
-
-          For example, if you have multiple articles, or tutorials that should be previewed
-          and submitted when there are changes in the repository.
-        required: false
-        default: false
-        type: boolean
       path:
         description: |
           The root directory path(s) where the Curvenote CLI will be invoked.
