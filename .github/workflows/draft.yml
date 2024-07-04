@@ -108,6 +108,7 @@ jobs:
           path: ${{ inputs.path }}
           enforce-single-folder: ${{ inputs.enforce-single-folder }}
           id-pattern-regex: ${{ inputs.id-pattern-regex }}
+          preview-label: true
   submit-draft:
     needs: strategy
     runs-on: ubuntu-latest
