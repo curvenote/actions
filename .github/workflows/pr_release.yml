@@ -26,6 +26,7 @@ jobs:
         run: |
           sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/publish.yml
           sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/draft.yml
+          sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/submit.yml
       - name: Build dist content
         run: |
           npm install
@@ -36,6 +37,7 @@ jobs:
           git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
           git add .github/workflows/publish.yml
           git add .github/workflows/draft.yml
+          git add .github/workflows/submit.yml
           git add -f strategy/dist
           git add -f submit-summary/dist
           git commit -m "🧪 PR${{ github.event.number }}"
