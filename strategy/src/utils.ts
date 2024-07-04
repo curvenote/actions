@@ -112,6 +112,10 @@ export function filterPathsAndIdentifyUnknownChanges(
     return !allowedPaths.some((allowed) => pathStartsWith(changed, allowed));
   });
 
+  // If '.' path is allowed, all changes are valid
+  if (allowedPaths.includes('.')) {
+    return { filteredPaths: [...filteredPaths, '.'], unknownChangedFiles: [] };
+  }
   return { filteredPaths, unknownChangedFiles };
 }
 
