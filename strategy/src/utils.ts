@@ -64,6 +64,19 @@ export async function resolvePaths(baseDir: string, pattern: string): Promise<st
 }
 
 /**
+ * Check if 'fullPath' path starts with 'basePath' path
+ *
+ * This only matches full directory names, e.g.
+ *
+ * pathStartsWith('papers/my-paper.md', 'pa') returns false
+ *
+ */
+function pathStartsWith(fullPath: string, basePath: string) {
+  const fullSliced = fullPath.split('/').slice(0, basePath.split('/').length).join('/');
+  return fullSliced === basePath;
+}
+
+/**
  * Filter the paths by the changed files, and mention any unknown changed files.
  *
  * @param allowedPaths The directories that are expected to have changes in them
@@ -89,14 +102,14 @@ export function filterPathsAndIdentifyUnknownChanges(
   const uniqueChangedPaths = Array.from(new Set(changedPaths));
 
   // Filter allowedPaths that are included in the changedPaths
-  const filteredPaths = allowedPaths.filter((allowed) =>
-    uniqueChangedPaths.some((changed) => changed.startsWith(allowed)),
-  );
+  const filteredPaths = allowedPaths.filter((allowed) => {
+    return uniqueChangedPaths.some((changed) => pathStartsWith(changed, allowed));
+  });
 
   // Identify changed files that are outside the specified paths
   const unknownChangedFiles = changedFiles.filter((changed) => {
     // Check if this file's base path does not start with any of the paths
-    return !allowedPaths.some((allowed) => changed.startsWith(allowed));
+    return !allowedPaths.some((allowed) => pathStartsWith(changed, allowed));
   });
 
   return { filteredPaths, unknownChangedFiles };

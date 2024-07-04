@@ -119,6 +119,14 @@ describe('utility tests', () => {
       unknownChangedFiles: ['posters/temp.tex', '.git/temp.bin'],
     });
   });
+  it('filterPathsAndIdentifyUnknownChanges - path . allows all changes', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(['p'], ['posters/temp.tex', '.git/temp.bin']),
+    ).toEqual({
+      filteredPaths: [],
+      unknownChangedFiles: ['posters/temp.tex', '.git/temp.bin'],
+    });
+  });
 
   it('getIdsFromPaths', async () => {
     memfs.vol.fromJSON({
