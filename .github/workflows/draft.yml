@@ -159,7 +159,6 @@ jobs:
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
   summary:
-    if: github.event_name == 'pull_request'
     needs:
       - strategy
       - submit-draft
@@ -172,5 +171,6 @@ jobs:
         with:
           matrix: '${{ needs.strategy.outputs.matrix }}'
       - uses: curvenote/actions/upsert-comment@main
+        if: ${{ github.event.pull_request.number }}
         with:
           comment: '${{ steps.summary.outputs.comment }}'

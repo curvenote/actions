@@ -84,6 +84,7 @@ function reportSummaryMessage(report: Report | undefined, buildUrl: string) {
 | :--- | :--- | :--- | :--- |
 ${submitLogs.map(({ data, info }) => `| **${info['working-directory']}** | 🔍 [Inspect](${data.buildUrl}) | ${reportSummaryMessage(data.report, data.buildUrl)} | ${formatDateUTC(data.submissionVersion.date_created)} |`).join('\n')}
 `;
+  console.log(table);
   core.setOutput('comment', table);
 })().catch((err) => {
   core.error(err);
