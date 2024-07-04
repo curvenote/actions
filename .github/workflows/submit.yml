@@ -120,7 +120,8 @@ jobs:
           ref: ${{ inputs.ref }}
           fetch-depth: 1
       - uses: curvenote/actions/setup@main
-      - run: |
+      - name: Run curvenote check
+        run: |
           if [ -n "${{ inputs.collection }}" ]; then
             COLLECTION="--collection ${{ inputs.collection }}"
           fi

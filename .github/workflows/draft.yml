@@ -78,9 +78,6 @@ on:
       CURVENOTE:
         description: Curvenote API token (usually `secrets.CURVENOTE_TOKEN`)
         required: true
-permissions:
-  contents: read
-  pull-requests: write
 jobs:
   strategy:
     runs-on: ubuntu-latest
@@ -150,7 +147,8 @@ jobs:
           typst: false
           images: false
       # Note, the collection shouldn't be necessary:
-      - run: |
+      - name: Run curvenote check
+        run: |
           if [ -n "${{ inputs.collection }}" ]; then
             COLLECTION="--collection ${{ inputs.collection }}"
           fi
