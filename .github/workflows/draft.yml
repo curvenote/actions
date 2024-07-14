@@ -62,6 +62,15 @@ on:
       ref:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, uses the default branch.
         type: string
+      comment:
+        description: |
+          By default, the draft workflow will create a summary comment on the PR / commit. If the action file
+          does not grant sufficient permissions for this, the action will fail.
+
+          Setting `comment: false` stops the workflow from attempting to comment, allowing the action to pass
+          without write permissions.
+        default: true
+        type: boolean
     secrets:
       GITHUB:
         description: GitHub API token (usually `env.GITHUB_TOKEN`)
@@ -159,6 +168,7 @@ jobs:
         id: summary
         with:
           matrix: '${{ needs.strategy.outputs.matrix }}'
-      - uses: curvenote/actions/upsert-comment@main
+      - if: ${{ inputs.comment }}
+        uses: curvenote/actions/upsert-comment@main
         with:
           comment: '${{ steps.summary.outputs.comment }}'
