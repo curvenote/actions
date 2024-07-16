@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       check: ${{ steps.build-strategy.outputs.check }}
-      preview: ${{ steps.build-strategy.outputs.preview }}
+      submit: ${{ steps.build-strategy.outputs.submit }}
       matrix: ${{ steps.build-strategy.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
@@ -116,6 +116,7 @@ jobs:
   check-and-submit:
     needs: strategy
     runs-on: ubuntu-latest
+    if: ${{ needs.strategy.outputs.submit == 'true'}}
     concurrency:
       group: submit-${{ github.head_ref }}-${{ matrix.working-directory }}
       cancel-in-progress: true

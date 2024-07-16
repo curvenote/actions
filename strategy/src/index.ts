@@ -92,6 +92,7 @@ These files are outside of an allowed folder path:
 
   // Indicate whether to run the next jobs
   core.setOutput('preview', doPreview);
+  core.setOutput('submit', doSubmit);
   core.setOutput('check', true);
   // Set the build matrix
   core.setOutput(
