@@ -59,6 +59,14 @@ on:
         required: false
         default: 'false'
         type: string
+      label:
+        description: |
+          A pull-request label that indicates the submission should be run.
+          Multiple labels can be added with comma-separated values.
+
+          If no label is supplied, the submission will run on all PRs.
+        required: false
+        type: string
       ref:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, uses the default branch.
         type: string
@@ -104,7 +112,7 @@ jobs:
           path: ${{ inputs.path }}
           enforce-single-folder: ${{ inputs.enforce-single-folder }}
           id-pattern-regex: ${{ inputs.id-pattern-regex }}
-          submit-label: true
+          submit-label: ${{ inputs.label || true }}
   check-and-submit:
     needs: strategy
     runs-on: ubuntu-latest
