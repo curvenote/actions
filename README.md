@@ -18,7 +18,6 @@ jobs:
   publish:
     uses: curvenote/actions/.github/workflows/publish.yml@v1
     with:
-      monorepo: true
       id-pattern-regex: '^<MYJOURNAL-COLLECTION>-(?:[a-zA-Z0-9-_]{3,15})$'
       enforce-single-folder: true
       preview-label: paper
@@ -33,9 +32,6 @@ jobs:
 ```
 
 ### Options
-
-1. **`monorepo` (boolean)**
-   When `true` indicates that this repository contains multiple projects that should be published. For example, if you have multiple articles, or tutorials that should be previewed and submitted when there are changes in the repository.
 
 1. **`id-pattern-regex` (string - regex)**
    A regular expression that all IDs must follow, by default this matches a UUID.

@@ -101,7 +101,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB }}
         with:
           changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
-          monorepo: ${{ inputs.monorepo }}
           path: ${{ inputs.path }}
           enforce-single-folder: ${{ inputs.enforce-single-folder }}
           id-pattern-regex: ${{ inputs.id-pattern-regex }}
