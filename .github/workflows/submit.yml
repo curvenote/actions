@@ -13,7 +13,7 @@ on:
         description: |
           The kind of the submission
 
-          Available kinds are dependent on the venue and collection
+          Available kinds depend on the venue and collection
         required: true
         type: string
       id-pattern-regex:
@@ -30,7 +30,8 @@ on:
         description: |
           The root directory path(s) where the Curvenote CLI will be invoked.
           If `multiple` paths are being used, separate the `path` string with ','.
-          The paths can also be glob-like patterns (but only one `*`), for example:
+          The paths can also end in one wildcard `*`, which will match all individual
+          subfolders, for example:
 
           ```yaml
           path: my/project
@@ -44,18 +45,9 @@ on:
         type: string
       enforce-single-folder:
         description: |
-          When true, an error will be raised if a pull-request is touching multiple
-          different folders. This can either be `true` or a label string.
-          Multiple labels can be added with comma-separated values.
-
-          If labels are used to control this property, the pull request will only fail in
-          PRs with these labels.
-
-          This can be used in conjunction with the `preview-label`, for example, if they
-          are both `paper` then the PRs with those labels will be required to only make changes
-          in a single folder and will not be previewed if that condition fails.
-          However, you can add additional preview labels, e.g. `all-papers`, which will build
-          previews for all papers, as the single folder condition is not enforced for that label.
+          When true, an error will be raised if a pull request is touching multiple
+          different folders. It will also error if changes are made outside a folder
+          described in `path`.
         required: false
         default: 'false'
         type: string
@@ -68,11 +60,13 @@ on:
         required: false
         type: string
       ref:
-        description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, uses the default branch.
+        description: |
+          The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow,
+          this defaults to the reference or SHA for that event. Otherwise, uses the default branch.
         type: string
       comment:
         description: |
-          By default, the draft workflow will create a summary comment on the PR / commit. If the action file
+          By default, the submit workflow will create a summary comment on the PR / commit. If the action file
           does not grant sufficient permissions for this, the action will fail.
 
           Setting `comment: false` stops the workflow from attempting to comment, allowing the action to pass
@@ -96,7 +90,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
           fetch-depth: 1
       - name: Get changed files
         id: changed-files
@@ -118,14 +112,14 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ needs.strategy.outputs.submit == 'true'}}
     concurrency:
-      group: submit-${{ github.head_ref }}-${{ matrix.working-directory }}
+      group: submit-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
       cancel-in-progress: true
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
           fetch-depth: 1
       - uses: curvenote/actions/setup@main
       - name: Run curvenote check

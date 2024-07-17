@@ -13,7 +13,7 @@ on:
         description: |
           The kind of the submission
 
-          Available kinds are dependent on the venue and collection
+          Available kinds depend on the venue and collection
         required: true
         type: string
       id-pattern-regex:
@@ -30,7 +30,8 @@ on:
         description: |
           The root directory path(s) where the Curvenote CLI will be invoked.
           If `multiple` paths are being used, separate the `path` string with ','.
-          The paths can also be glob-like patterns (but only one `*`), for example:
+          The paths can also end in one wildcard `*`, which will match all individual
+          subfolders, for example:
 
           ```yaml
           path: my/project
@@ -44,23 +45,16 @@ on:
         type: string
       enforce-single-folder:
         description: |
-          When true, an error will be raised if a pull-request is touching multiple
-          different folders. This can either be `true` or a label string.
-          Multiple labels can be added with comma-separated values.
-
-          If labels are used to control this property, the pull request will only fail in
-          PRs with these labels.
-
-          This can be used in conjunction with the `preview-label`, for example, if they
-          are both `paper` then the PRs with those labels will be required to only make changes
-          in a single folder and will not be previewed if that condition fails.
-          However, you can add additional preview labels, e.g. `all-papers`, which will build
-          previews for all papers, as the single folder condition is not enforced for that label.
+          When true, an error will be raised if a pull request is touching multiple
+          different folders. It will also error if changes are made outside a folder
+          described in `path`.
         required: false
         default: 'false'
         type: string
       ref:
-        description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, uses the default branch.
+        description: |
+          The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow,
+          this defaults to the reference or SHA for that event. Otherwise, uses the default branch.
         type: string
       comment:
         description: |
@@ -109,7 +103,7 @@ jobs:
     needs: strategy
     runs-on: ubuntu-latest
     concurrency:
-      group: submit-draft-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
+      group: draft-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
       cancel-in-progress: true
     if: ${{ needs.strategy.outputs.preview == 'true'}}
     strategy:
