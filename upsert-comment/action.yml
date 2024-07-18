@@ -1,5 +1,5 @@
 name: Comment based on build results
-description: Add a comment to the PR
+description: Add a comment to the PR or commit
 author: Curvenote Inc.
 branding:
   icon: package
@@ -14,15 +14,16 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Find Comment
+    - name: Find PR Comment
+      if: ${{ github.event.pull_request.number }}
       uses: peter-evans/find-comment@v3
       id: fc
       with:
         issue-number: ${{ github.event.pull_request.number }}
         comment-author: 'github-actions[bot]'
         body-includes: ${{ inputs.title }}
-    - name: Create comment
-      if: steps.fc.outputs.comment-id == ''
+    - name: Create PR comment
+      if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id == '' }}
       uses: peter-evans/create-or-update-comment@v4
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -30,12 +31,20 @@ runs:
           **${{ inputs.title }}**
 
           ${{ inputs.comment }}
-    - name: Update comment
-      if: steps.fc.outputs.comment-id != ''
+    - name: Update PR comment
+      if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id != '' }}
       uses: peter-evans/create-or-update-comment@v4
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         edit-mode: replace
+        body: |
+          **${{ inputs.title }}**
+
+          ${{ inputs.comment }}
+    - name: Create Commit comment
+      if: ${{ !github.event.pull_request.number }}
+      uses: peter-evans/commit-comment@v3
+      with:
         body: |
           **${{ inputs.title }}**
 

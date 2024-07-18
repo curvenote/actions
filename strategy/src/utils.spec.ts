@@ -119,6 +119,22 @@ describe('utility tests', () => {
       unknownChangedFiles: ['posters/temp.tex', '.git/temp.bin'],
     });
   });
+  it('filterPathsAndIdentifyUnknownChanges - substring does not match path', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(['p'], ['posters/temp.tex', '.git/temp.bin']),
+    ).toEqual({
+      filteredPaths: [],
+      unknownChangedFiles: ['posters/temp.tex', '.git/temp.bin'],
+    });
+  });
+  it('filterPathsAndIdentifyUnknownChanges - path . allows all changes', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(['.'], ['posters/temp.tex', '.git/temp.bin']),
+    ).toEqual({
+      filteredPaths: ['.'],
+      unknownChangedFiles: [],
+    });
+  });
 
   it('getIdsFromPaths', async () => {
     memfs.vol.fromJSON({
