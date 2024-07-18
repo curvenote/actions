@@ -53,7 +53,7 @@ on:
         type: string
       label:
         description: |
-          A pull-request label that indicates the submission should be run.
+          A pull request label that indicates the submission should be run.
           Multiple labels can be added with comma-separated values.
 
           If no label is supplied, the submission will run on all PRs.

@@ -51,6 +51,14 @@ on:
         required: false
         default: 'false'
         type: string
+      label:
+        description: |
+          A pull request label that indicates the preview should be run.
+          Multiple labels can be added with comma-separated values.
+
+          If no label is supplied, the preview will run on all PRs.
+        required: false
+        type: string
       ref:
         description: |
           The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow,
@@ -98,7 +106,7 @@ jobs:
           path: ${{ inputs.path }}
           enforce-single-folder: ${{ inputs.enforce-single-folder }}
           id-pattern-regex: ${{ inputs.id-pattern-regex }}
-          preview-label: true
+          preview-label: ${{ inputs.label || true }}
   submit-draft:
     needs: strategy
     runs-on: ubuntu-latest
