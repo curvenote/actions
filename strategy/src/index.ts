@@ -17,16 +17,9 @@ import {
     return;
   }
   const octokit = new Octokit({ auth: githubToken });
-  const monorepo = core.getInput('monorepo') === 'true';
   const paths = await resolvePaths('', core.getInput('path'));
   const { assignees, reviewers } = (await getPullRequestReviewers(octokit)) ?? {};
 
-  if (!monorepo && paths.length !== 1) {
-    core.setFailed(
-      'Cannot include multiple paths if the strategy is not a monorepo.\n\nEither set `monorepo: true` or set a single path (without glob-like patterns).',
-    );
-    return;
-  }
   const previewLabel = booleanOrLabels(core.getInput('preview-label'));
   const submitLabel = booleanOrLabels(core.getInput('submit-label'));
   const idPatternRegex = core.getInput('id-pattern-regex');
@@ -53,7 +46,6 @@ import {
   console.log(
     'Strategy Inputs:\n\n',
     {
-      monorepo,
       enforceSingleFolder,
       paths,
       pathIds,
@@ -100,6 +92,7 @@ These files are outside of an allowed folder path:
 
   // Indicate whether to run the next jobs
   core.setOutput('preview', doPreview);
+  core.setOutput('submit', doSubmit);
   core.setOutput('check', true);
   // Set the build matrix
   core.setOutput(

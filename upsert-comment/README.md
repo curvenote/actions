@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Streamlines the process of inserting or updating a comment on pull requests (PRs) within GitHub repositories. It allows for dynamic insertion or update of comments based on the results of build processes or any other automated workflow steps. This action can be particularly useful for providing feedback, results, or notifications directly within the context of a PR review process.
+Streamlines the process of inserting or updating a comment on pull requests (PRs) within GitHub repositories. It allows for dynamic insertion or update of comments based on the results of build processes or any other automated workflow steps. This action can be particularly useful for providing feedback, results, or notifications directly within the context of a PR review process. If this action is run outside the context of a PR, it will make a comment on the commit.
 
 ## Features
 
@@ -47,7 +47,7 @@ permissions:
 The action operates in a composite run steps mode and includes the following steps:
 
 1. **Find Comment:** Initially, it attempts to find an existing comment in the PR that matches the given criteria (issue number, comment author, and body includes the specified title).
-2. **Create Comment:** If no existing comment matches the criteria, a new comment is created in the pull request with the provided title and body.
+2. **Create Comment:** If no existing comment matches the criteria, a new comment is created in the pull request with the provided title and body. If there is no PR at all, a comment is created on the current commit.
 3. **Update Comment:** If an existing comment is found, it is updated with the new content, replacing the old comment entirely.
 
 ## Support

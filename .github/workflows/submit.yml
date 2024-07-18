@@ -1,0 +1,159 @@
+name: submit
+on:
+  workflow_call:
+    inputs:
+      venue:
+        description: The site or venue that this project is being submitted to
+        required: true
+        type: string
+      collection:
+        description: The venue's collection that this collection is being submitted to
+        type: string
+      kind:
+        description: |
+          The kind of the submission
+
+          Available kinds depend on the venue and collection
+        required: true
+        type: string
+      id-pattern-regex:
+        description: |
+          A regular expression that all IDs must follow, by default this matches a UUID.
+
+          This can be used to enforce that all project IDs follow a specific pattern, such as,
+          the conference name + year.
+
+          The ID must also satisfy alphanumeric characters, dashes, and underscores.
+        type: string
+        default: '^([a-zA-Z0-9-]{36})$'
+      path:
+        description: |
+          The root directory path(s) where the Curvenote CLI will be invoked.
+          If `multiple` paths are being used, separate the `path` string with ','.
+          The paths can also end in one wildcard `*`, which will match all individual
+          subfolders, for example:
+
+          ```yaml
+          path: my/project
+          path: my/paper, my/poster
+          path: papers/*, posters/*
+          ```
+
+          The default path is the root of the repository.
+        required: false
+        default: '.'
+        type: string
+      enforce-single-folder:
+        description: |
+          When true, an error will be raised if a pull request is touching multiple
+          different folders. It will also error if changes are made outside a folder
+          described in `path`.
+        required: false
+        default: 'false'
+        type: string
+      label:
+        description: |
+          A pull request label that indicates the submission should be run.
+          Multiple labels can be added with comma-separated values.
+
+          If no label is supplied, the submission will run on all PRs.
+        required: false
+        type: string
+      ref:
+        description: |
+          The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow,
+          this defaults to the reference or SHA for that event. Otherwise, uses the default branch.
+        type: string
+      comment:
+        description: |
+          By default, the submit workflow will create a summary comment on the PR / commit. If the action file
+          does not grant sufficient permissions for this, the action will fail.
+
+          Setting `comment: false` stops the workflow from attempting to comment, allowing the action to pass
+          without write permissions.
+        default: true
+        type: boolean
+    secrets:
+      GITHUB:
+        description: GitHub API token (usually `env.GITHUB_TOKEN`)
+        required: true
+      CURVENOTE:
+        description: Curvenote API token (usually `secrets.CURVENOTE_TOKEN`)
+        required: true
+jobs:
+  strategy:
+    runs-on: ubuntu-latest
+    outputs:
+      check: ${{ steps.build-strategy.outputs.check }}
+      submit: ${{ steps.build-strategy.outputs.submit }}
+      matrix: ${{ steps.build-strategy.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          separator: ','
+      - id: build-strategy
+        uses: curvenote/actions/strategy@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB }}
+        with:
+          changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
+          path: ${{ inputs.path }}
+          enforce-single-folder: ${{ inputs.enforce-single-folder }}
+          id-pattern-regex: ${{ inputs.id-pattern-regex }}
+          submit-label: ${{ inputs.label || true }}
+  check-and-submit:
+    needs: strategy
+    runs-on: ubuntu-latest
+    if: ${{ needs.strategy.outputs.submit == 'true'}}
+    concurrency:
+      group: submit-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
+      cancel-in-progress: true
+    strategy:
+      matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - uses: curvenote/actions/setup@main
+      - name: Run curvenote check
+        run: |
+          if [ -n "${{ inputs.collection }}" ]; then
+            COLLECTION="--collection ${{ inputs.collection }}"
+          fi
+          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION
+        working-directory: ${{ matrix.working-directory }}
+        env:
+          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
+      - uses: curvenote/actions/submit@main
+        env:
+          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
+        with:
+          id: ${{ matrix.id }}
+          venue: ${{ inputs.venue }}
+          collection: ${{ inputs.collection }}
+          kind: ${{ inputs.kind }}
+          working-directory: ${{ matrix.working-directory }}
+          draft: false
+  summary:
+    needs:
+      - strategy
+      - check-and-submit
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB }}
+    steps:
+      - uses: curvenote/actions/submit-summary@main
+        id: summary
+        with:
+          matrix: '${{ needs.strategy.outputs.matrix }}'
+      - if: ${{ inputs.comment }}
+        uses: curvenote/actions/upsert-comment@main
+        with:
+          comment: '${{ steps.summary.outputs.comment }}'
