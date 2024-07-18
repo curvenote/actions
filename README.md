@@ -1,13 +1,19 @@
 # @curvenote/actions
 
-These actions allow you to connect your github repository to a Curvenote Site and run your editorial workflow from pull requests.
+These actions allow you to connect your github repository with [MyST](https://mystmd.org) content to a Curvenote site and run your editorial workflow from pull requests.
 
-## Quickstart
+Currently there are two actions available:
 
-Add a file to your repository at `.github/workflows/publish.yml` with the following contents:
+1. `draft.yml` to create preview drafts and run journal checks
+
+1. `submit.yml` to submit to a journal
+
+## Get Started: Create a draft from your repository
+
+To begin publishing content from your github repository with curvenote, add a file to your repository at `.github/workflows/draft.yml` with the following contents:
 
 ```yaml
-name: curvenote
+name: curvenote draft
 on:
   pull_request:
     branches: ['main']
@@ -15,73 +21,107 @@ permissions:
   contents: read
   pull-requests: write
 jobs:
-  publish:
-    uses: curvenote/actions/.github/workflows/publish.yml@v1
+  create-preview-draft:
+    uses: curvenote/actions/.github/workflows/draft.yml@v1
     with:
-      id-pattern-regex: '^<MYJOURNAL-COLLECTION>-(?:[a-zA-Z0-9-_]{3,15})$'
-      enforce-single-folder: true
-      preview-label: paper
-      submit-label: true
       venue: '<VENUE>'
-      collection: '<COLLECTION>'
       kind: '<SUBMISSION-KIND>'
-      path: papers/*
     secrets:
       CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
       GITHUB: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+This workflow runs on all PRs made to branch `main` and creates a draft submission to `<VENUE>`. A comment will also be added to the PR with links to results of automated content checks and the preview version of your content.
+
 ### Options
 
-1. **`id-pattern-regex` (string - regex)**
-   A regular expression that all IDs must follow, by default this matches a UUID.
-
-   This can be used to enforce that all project IDs follow a specific pattern, such as,
-   the conference name + year.
-
-   The ID must also satisfy alphanumeric characters, dashes, and underscores.
-
-1. **`enforce-single-folder` (boolean)**
-   When `true`, an error will be raised if a pull-request is touching multiple
-   different folders. This can either be `true` or a label string.
-   Multiple labels can be added with comma-separated values.
-
-   If labels are used to control this property, the pull request will only fail in
-   PRs with these labels.
-
-   This can be used in conjunction with the `preview-label`, for example, if they
-   are both `paper` then the PRs with those labels will be required to only make changes
-   in a single folder and will not be previewed if that condition fails.
-   However, you can add additional preview labels, e.g. `all-papers`, which will build
-   previews for all papers, as the single folder condition is not enforced for that label.
-
-1. **`preview-label` (string)**
-   A pull-request label that indicates the preview and checks should be run.
-   Multiple labels can be added with comma-separated values.
-
-   If no label is supplied, the preview will run on all PRs.
-
-1. **`submit-label` (string)**
-   A pull-request label that indicates the branch should be turned into a submission.
-   This will notify all curators of the Curvenote site.
-
-   The submission identifiers will be written directly to the repository in a commit,
-   and the submission will be available to be merged on the Curvenote platform.
-
-   A submission will not happen unless both the `enforce-single-folder` and `preview-label`
-   conditions are satisfied.
-
 1. **`venue` (string)**
-   The site or venue that this project is being submitted to.
-
-1. **`collection` (string)**
-   The venue's collection that this project is being submitted to.
+   The Curvenote site or venue that this project is being submitted to.
 
 1. **`kind` (string)**
-   The kind of the submission, that must be a kind included in the `collection` being submitted to.
+   The kind of the submission, which must be a kind included in the `collection` being submitted to. If you are submitting to a site's non-default collection, you may need to specify `collection: '<SUBMISSION-COLLECTION>` alongside venue and kind.
 
-1. **`path` (string - glob pattern)**
-   The root directory path(s) where the Curvenote CLI will be invoked. If `multiple` paths are being used, separate the `path` string with ','. The paths can also be glob-like patterns (but only one `*`), for example:
+### Permissions
+
+1. **contents: read**
+   This permission level is required to clone the repository during the action. It is necessary for all curvenote actions.
+
+1. **pull-requests: write**
+   This permission level is required to (1) access changes on a pull request and (2) comment on the pull request. If you do not want to give **write** permissions, you may add `comment: false` to the `with:` section; this will disable commenting.
+   If you run this workflow outside of pull requests (for example on `push` instead of on `pull_request`), you do not need pull request permissions at all.
+
+### Secrets
+
+1. **`CURVENOTE_TOKEN`**
+   A Curvenote API token is required. This can be added as a secret within your [GitHub Repository or Environment](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions). An API Token can be generated for any user account at [curvenote.com](https://curvenote.com/profile?settings=true&tab=profile-api&subtab=general), the user account used must be on the Team a associated with your site and have sufficient rights.
+
+2. **`GITHUB_TOKEN`**
+   The github token is available when all actions are run and does not need to be explicitly set anywhere.
+
+## Next step: Submit your content
+
+When you are ready to submit your content to a Curvenote site after reviewing your draft preview, you need another workflow file `.github/workflows/submit.yml`:
+
+```yaml
+name: curvenote submit
+on:
+  push:
+    branches: ['main']
+permissions:
+  contents: write
+jobs:
+  create-submission:
+    uses: curvenote/actions/.github/workflows/submit.yml@v1
+    with:
+      venue: '<VENUE>'
+      kind: '<SUBMISSION-KIND>'
+    secrets:
+      CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
+      GITHUB: ${{ secrets.GITHUB_TOKEN }}
+```
+
+This workflow runs on all pushes to `main`, so it will run when you merge the pull request used by the previous workflow. Besides running on push, the only differences between this workflow and the draft workflow are:
+
+- it uses Curvenote's `submit.yml` workflow instead of `draft.yml`
+
+- it requires `contents: write`. Similar to the previous workflow, you may downgrade this to `contents: read` if you add `comment: false` to the `with:` section.
+
+## A more complicated example: Journal monorepo drafts
+
+These Curvenote actions may be used by a journal to accept submissions. In the previous examples, authors were expected to add the workflows to their source repository. In this example, a journal has a monorepo that accepts pull requests from authors. First, the monorepo can have an action that runs content checks and creates preview builds when an author opens a PR:
+
+```yaml
+name: curvenote journal draft
+on:
+  pull_request_target:
+    branches: ['main']
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  create-preview-draft:
+    uses: curvenote/actions/.github/workflows/draft.yml@v1
+    with:
+      venue: '<VENUE>'
+      kind: '<SUBMISSION-KIND>'
+      collection: '<SUBMISSION-COLLECTION>'
+      path: submissions/*
+      enforce-single-folder: true
+      id-pattern-regex: '^my-journal-[0-9]{1,10}$'
+    secrets:
+      CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
+      GITHUB: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Since the journal must accept pull requests from forks, `pull_request_target` is required instead of `pull_request` in the simpler example. This grants a more permissive `GITHUB_TOKEN` to the action; you may read about the implications in [GitHub's Docs](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request_target). Aside from that change, permissions and secrets match the simpler workflow described above. This workflow introduces new options:
+
+### Options
+
+1. **`collection` (string)**
+   The venue's collection that projects are submitted to.
+
+1. **`path` (string)**
+   The root directory path(s) where the Curvenote CLI will be invoked. If multiple paths are being used, separate the `path` string with ','. The paths can also end in one wildcard `*`, which will match all individual subfolders, for example:
 
    ```yaml
    path: my/project
@@ -91,8 +131,50 @@ jobs:
 
    The default path is the root of the repository.
 
-### Secrets
+   For this example, specifying `path: submissions/*` means authors must fork the repository and create a unique subfolder inside `submissions/`.
 
-A Curvenote API token is required. This can be added as a secret within your [GitHub Repository or Environment](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
+1. **`enforce-single-folder` (boolean)**
+   When true, an error will be raised if a pull request is touching multiple different folders. It will also error if changes are made outside a folder described in `path`.
 
-An API Token can be generated for any user account at [curvenote.com](https://curvenote.com/profile?settings=true&tab=profile-api&subtab=general), the user account used must be on the Team a associated with your site and have sufficient rights.
+   For this example, `enforce-single-folder` is `true` so authors do not make changes to the repository outside their single submission.
+
+1. **`id-pattern-regex` (string - regex)**
+   A regular expression that all IDs must follow, by default this matches a UUID. This can be used to enforce that all project IDs follow a specific pattern, such as, the conference name + year. The ID must also satisfy alphanumeric characters, dashes, and underscores.
+
+## A more complicated example: Journal monorepo submissions
+
+For this journal monorepo, once editors are happy with an author's pull request, they can submit by adding the `ready` label:
+
+```yaml
+name: curvenote journal submit
+on:
+  pull_request_target:
+    branches: ['main']
+    types: ['labeled']
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  create-submission:
+    uses: curvenote/actions/.github/workflows/submit.yml@v1
+    with:
+      venue: '<VENUE>'
+      kind: '<SUBMISSION-KIND>'
+      collection: '<SUBMISSION-COLLECTION>'
+      path: submissions/*
+      enforce-single-folder: true
+      id-pattern-regex: '^my-journal-[0-9]{1,10}$'
+      label: ready
+    secrets:
+      CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
+      GITHUB: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Of course, this workflow could also be triggered `on` push to `main` or even setup to only run manually. The Curvenote action is unopinionated about the [events to trigger workflows](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows). This workflow file only adds one option:
+
+### Options
+
+1. **`label` (string)**
+   A pull request label that indicates the submission should be run. Multiple labels can be added with comma-separated values. If no label is supplied, the submission will run on all PRs. This option is incompatible with workflows triggered outside of PRs.
+
+   For this example, the workflow is triggered on the `labeled` action - so adding the `ready` label will cause the action to run once and perform the submission.
