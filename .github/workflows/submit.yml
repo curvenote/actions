@@ -73,6 +73,10 @@ on:
           without write permissions.
         default: true
         type: boolean
+      strict:
+        description: Stop submission if checks fail.
+        default: false
+        type: boolean
     secrets:
       GITHUB:
         description: GitHub API token (usually `env.GITHUB_TOKEN`)
@@ -131,7 +135,8 @@ jobs:
         working-directory: ${{ matrix.working-directory }}
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
-      - uses: curvenote/actions/submit@main
+      - if: ${{ !failure() || !inputs.strict }}
+        uses: curvenote/actions/submit@main
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         with:
@@ -142,6 +147,7 @@ jobs:
           working-directory: ${{ matrix.working-directory }}
           draft: false
   summary:
+    if: ${{ always() }}
     needs:
       - strategy
       - check-and-submit
