@@ -60,6 +60,10 @@ function reportSummaryMessage(report: Report | undefined, buildUrl: string) {
       }),
     ),
   );
+  if (!fs.existsSync('logs')) {
+    core.setOutput('comment', '📭 No submissions available to inspect.');
+    return;
+  }
   const submitLogs = fs
     .readdirSync('logs')
     .map((dir) => {
