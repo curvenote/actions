@@ -165,12 +165,13 @@ jobs:
       enforce-single-folder: true
       id-pattern-regex: '^my-journal-[0-9]{1,10}$'
       label: ready
+      strict: true
     secrets:
       CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
       GITHUB: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-Of course, this workflow could also be triggered `on` push to `main` or even setup to only run manually. The Curvenote action is unopinionated about the [events to trigger workflows](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows). This workflow file only adds one option:
+Of course, this workflow could also be triggered `on` push to `main` or even setup to only run manually. The Curvenote action is unopinionated about the [events to trigger workflows](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows). This workflow file adds the options:
 
 ### Options
 
@@ -178,3 +179,8 @@ Of course, this workflow could also be triggered `on` push to `main` or even set
    A pull request label that indicates the submission should be run. Multiple labels can be added with comma-separated values. If no label is supplied, the submission will run on all PRs. This option is incompatible with workflows triggered outside of PRs.
 
    For this example, the workflow is triggered on the `labeled` action - so adding the `ready` label will cause the action to run once and perform the submission.
+
+1. **`strict` (boolean)**
+   Stop submission if checks fail. By default, strict is `false` and submissions always proceed even if checks fail. This allows editors flexibility to publish a submission even if a check fails (e.g. a link does not resolve).
+
+   For this example, however, strict is set to `true`; during the submit workflow, the submission will not be attempted if checks fail. One major caveat here is without the submission, check results are also not uploaded to the Curvenote preview. This means for an effective submission workflow, the author must have access to checks from the `draft` action so they may review and fix their content.
