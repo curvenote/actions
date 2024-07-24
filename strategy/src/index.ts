@@ -64,7 +64,12 @@ import {
     '\n\n',
   );
 
-  const { messages, valid: idsAreValid } = ensureUniqueAndValidIds(pathIds, idPatternRegex);
+  const filteredPathIds: Record<string, string | null> = {};
+  filteredPaths.forEach((path) => {
+    filteredPathIds[path] = pathIds[path];
+  });
+
+  const { messages, valid: idsAreValid } = ensureUniqueAndValidIds(filteredPathIds, idPatternRegex);
 
   if (!idsAreValid) {
     core.setFailed(
