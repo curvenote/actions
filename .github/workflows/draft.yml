@@ -158,9 +158,11 @@ jobs:
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
   summary:
+    if: ${{ always() }}
     needs:
       - strategy
       - submit-draft
+      - check
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB }}

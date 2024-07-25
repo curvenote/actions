@@ -111,10 +111,36 @@ jobs:
           enforce-single-folder: ${{ inputs.enforce-single-folder }}
           id-pattern-regex: ${{ inputs.id-pattern-regex }}
           submit-label: ${{ inputs.label || true }}
-  check-and-submit:
+  check:
     needs: strategy
     runs-on: ubuntu-latest
-    if: ${{ needs.strategy.outputs.submit == 'true'}}
+    if: ${{ needs.strategy.outputs.check == 'true'}}
+    strategy:
+      matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - uses: curvenote/actions/setup@main
+        with:
+          typst: false
+          images: false
+      - name: Run curvenote check
+        run: |
+          if [ -n "${{ inputs.collection }}" ]; then
+            COLLECTION="--collection ${{ inputs.collection }}"
+          fi
+          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION
+        working-directory: ${{ matrix.working-directory }}
+        env:
+          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
+  submit:
+    needs:
+      - strategy
+      - check
+    runs-on: ubuntu-latest
+    if: ${{ needs.strategy.outputs.submit == 'true' && (!failure() || !inputs.strict) }}
     concurrency:
       group: submit-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
       cancel-in-progress: true
@@ -126,17 +152,7 @@ jobs:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
           fetch-depth: 1
       - uses: curvenote/actions/setup@main
-      - name: Run curvenote check
-        run: |
-          if [ -n "${{ inputs.collection }}" ]; then
-            COLLECTION="--collection ${{ inputs.collection }}"
-          fi
-          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION
-        working-directory: ${{ matrix.working-directory }}
-        env:
-          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
-      - if: ${{ !failure() || !inputs.strict }}
-        uses: curvenote/actions/submit@main
+      - uses: curvenote/actions/submit@main
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         with:
@@ -150,7 +166,8 @@ jobs:
     if: ${{ always() }}
     needs:
       - strategy
-      - check-and-submit
+      - check
+      - submit
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
