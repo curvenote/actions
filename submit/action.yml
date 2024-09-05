@@ -43,7 +43,7 @@ runs:
         fi
         curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION $DRAFT -y
     - name: Publish submission
-      if: ${{ inputs.publish && !inputs.draft }}
+      if: ${{ inputs.publish == 'true' && !(inputs.draft == 'true') }}
       shell: bash
       run: |
         curvenote sub publish ${{ inputs.venue }}
