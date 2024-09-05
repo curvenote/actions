@@ -126,6 +126,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ needs.strategy.outputs.check == 'true'}}
     strategy:
+      fail-fast: false
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v4
@@ -155,6 +156,7 @@ jobs:
       group: submit-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
       cancel-in-progress: true
     strategy:
+      fail-fast: false
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v4
