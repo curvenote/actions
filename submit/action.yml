@@ -26,7 +26,10 @@ inputs:
     description: Flag to indicate if the submission should be a draft
     default: false
   publish:
-    description: Flag to indicate if the submission should be immediately published without additional review
+    description: |
+      Flag to indicate if the submission should be immediately published without additional review
+
+      Ignored if draft is true
     default: false
 runs:
   using: composite
@@ -44,6 +47,7 @@ runs:
         curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION $DRAFT -y
     - name: Publish submission
       if: ${{ inputs.publish == 'true' && !(inputs.draft == 'true') }}
+      working-directory: ${{ inputs.working-directory }}
       shell: bash
       run: |
         curvenote sub publish ${{ inputs.venue }}
