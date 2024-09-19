@@ -77,6 +77,16 @@ on:
         description: Stop submission if checks fail.
         default: false
         type: boolean
+      publish:
+        description: |
+          Immediately publish a submission after successful submit action. This bypasses any
+          manual review of the submission preview. The CURVENOTE token must have sufficient
+          permissions to publish a submission.
+
+          This flag should not be used for venues where editors accept submissions from
+          external authors, as it gives authors complete control over published content.
+        default: false
+        type: boolean
     secrets:
       GITHUB:
         description: GitHub API token (usually `env.GITHUB_TOKEN`)
@@ -116,6 +126,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ needs.strategy.outputs.check == 'true'}}
     strategy:
+      fail-fast: false
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v4
@@ -145,6 +156,7 @@ jobs:
       group: submit-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
       cancel-in-progress: true
     strategy:
+      fail-fast: false
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v4
@@ -162,6 +174,7 @@ jobs:
           kind: ${{ inputs.kind }}
           working-directory: ${{ matrix.working-directory }}
           draft: false
+          publish: ${{ inputs.publish }}
   summary:
     if: ${{ always() }}
     needs:
