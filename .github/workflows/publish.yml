@@ -1,3 +1,4 @@
+# This workflow is deprecated
 name: publish
 on:
   workflow_call:
