@@ -136,7 +136,7 @@ jobs:
   check:
     needs: strategy
     runs-on: ubuntu-latest
-    if: ${{ needs.strategy.outputs.matrix != '' && needs.strategy.outputs.matrix != '[]' && needs.strategy.outputs.check == 'true'}}
+    if: ${{ toJson(fromJson(needs.strategy.outputs.matrix).include) != '[]' && needs.strategy.outputs.check == 'true'}}
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
