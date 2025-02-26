@@ -78,21 +78,28 @@ import {
     return;
   }
 
-  if (enforceSingleFolder && filteredPaths.length > 1) {
-    core.setFailed(
-      `The strategy is set to fail when changes are made outside of a single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
-There are changes in multiple folders:
-  - ${filteredPaths.join('\n  - ')}`,
-    );
-    return;
-  }
-  if (enforceSingleFolder && unknownChangedFiles.length > 0) {
-    core.setFailed(
-      `The strategy is set to fail when changes are made outside of a single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
+  if (enforceSingleFolder) {
+    if (filteredPaths.length > 1) {
+      core.setFailed(
+        `The strategy is set to fail when changes are made outside of a single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
+  There are changes in multiple folders:
+    - ${filteredPaths.join('\n  - ')}`,
+      );
+      return;
+    }
+    if (
+      unknownChangedFiles.length > 0 &&
+      (filteredPaths.length > 0 ||
+        (doPreview && typeof previewLabel === 'string') ||
+        (doSubmit && typeof submitLabel === 'string'))
+    ) {
+      core.setFailed(
+        `The strategy is set to fail when changes are made outside of a single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
 These files are outside of an allowed folder path:
   - ${unknownChangedFiles.join('\n  - ')}`,
-    );
-    return;
+      );
+      return;
+    }
   }
 
   // Indicate whether to run the next jobs
