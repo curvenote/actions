@@ -124,7 +124,7 @@ jobs:
   check:
     needs: strategy
     runs-on: ubuntu-latest
-    if: ${{ needs.strategy.outputs.check == 'true'}}
+    if: ${{ toJson(fromJson(needs.strategy.outputs.matrix).include) != '[]' && needs.strategy.outputs.check == 'true'}}
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
@@ -142,7 +142,7 @@ jobs:
           if [ -n "${{ inputs.collection }}" ]; then
             COLLECTION="--collection ${{ inputs.collection }}"
           fi
-          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION
+          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION -d
         working-directory: ${{ matrix.working-directory }}
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
@@ -151,7 +151,7 @@ jobs:
       - strategy
       - check
     runs-on: ubuntu-latest
-    if: ${{ needs.strategy.outputs.submit == 'true' && (!failure() || !inputs.strict) }}
+    if: ${{ toJson(fromJson(needs.strategy.outputs.matrix).include) != '[]' && needs.strategy.outputs.submit == 'true' && (!failure() || !inputs.strict) }}
     concurrency:
       group: submit-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
       cancel-in-progress: true
