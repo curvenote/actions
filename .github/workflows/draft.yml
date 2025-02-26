@@ -113,7 +113,7 @@ jobs:
     concurrency:
       group: draft-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
       cancel-in-progress: true
-    if: ${{ toJson(fromJson(needs.strategy.outputs.matrix)) != '[]' && needs.strategy.outputs.preview == 'true'}}
+    if: ${{ toJson(fromJson(needs.strategy.outputs.matrix).include) != '[]' && needs.strategy.outputs.preview == 'true'}}
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
