@@ -1,3 +1,4 @@
+# This workflow is deprecated
 name: publish
 on:
   workflow_call:
@@ -178,7 +179,7 @@ jobs:
           if [ -n "${{ inputs.collection }}" ]; then
             COLLECTION="--collection ${{ inputs.collection }}"
           fi
-          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION
+          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION -d
         working-directory: ${{ matrix.working-directory }}
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}

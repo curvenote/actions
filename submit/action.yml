@@ -44,13 +44,13 @@ runs:
         if [ -n "${{ inputs.collection }}" ]; then
           COLLECTION="--collection ${{ inputs.collection }}"
         fi
-        curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION $DRAFT -y
+        curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION $DRAFT -y -d
     - name: Publish submission
       if: ${{ inputs.publish == 'true' && !(inputs.draft == 'true') }}
       working-directory: ${{ inputs.working-directory }}
       shell: bash
       run: |
-        curvenote sub publish ${{ inputs.venue }}
+        curvenote sub publish ${{ inputs.venue }} -d
     - name: Upload Curvenote Logs
       uses: actions/upload-artifact@v4
       with:
