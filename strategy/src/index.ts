@@ -90,8 +90,8 @@ import {
     if (
       unknownChangedFiles.length > 0 &&
       (filteredPaths.length > 0 ||
-        (doPreview && typeof previewLabel === 'string') ||
-        (doSubmit && typeof submitLabel === 'string'))
+        (doPreview && typeof previewLabel !== 'boolean') ||
+        (doSubmit && typeof submitLabel !== 'boolean'))
     ) {
       core.setFailed(
         `The strategy is set to fail when changes are made outside of a single folder (\`enforce-single-folder: ${rawEnforceSingleFolder}\`).
