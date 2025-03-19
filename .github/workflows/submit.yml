@@ -112,7 +112,7 @@ jobs:
         with:
           separator: ','
       - id: build-strategy
-        uses: curvenote/actions/strategy@main
+        uses: curvenote/actions/strategy@PR38
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB }}
         with:
@@ -133,7 +133,7 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
           fetch-depth: 1
-      - uses: curvenote/actions/setup@main
+      - uses: curvenote/actions/setup@PR38
         with:
           typst: false
           images: false
@@ -163,8 +163,8 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
           fetch-depth: 1
-      - uses: curvenote/actions/setup@main
-      - uses: curvenote/actions/submit@main
+      - uses: curvenote/actions/setup@PR38
+      - uses: curvenote/actions/submit@PR38
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         with:
@@ -185,11 +185,11 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
     steps:
-      - uses: curvenote/actions/submit-summary@main
+      - uses: curvenote/actions/submit-summary@PR38
         id: summary
         with:
           matrix: '${{ needs.strategy.outputs.matrix }}'
       - if: ${{ inputs.comment }}
-        uses: curvenote/actions/upsert-comment@main
+        uses: curvenote/actions/upsert-comment@PR38
         with:
           comment: '${{ steps.summary.outputs.comment }}'
