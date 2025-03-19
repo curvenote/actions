@@ -22,7 +22,7 @@ runs:
       shell: bash
     - name: Install Typst for PDF builds
       if: ${{ inputs.typst == 'true' }}
-      uses: typst-community/setup-typst@ed0dd8f60af43a3b8a881db89ef24b020674ba85
+      uses: typst-community/setup-typst@468250b312a80ba1ce98072d08f4d20cc49d268c
     - name: Install image transformation utilities
       if: ${{ inputs.images == 'true' }}
       shell: bash
