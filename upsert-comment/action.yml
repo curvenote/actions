@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Find PR Comment
       if: ${{ github.event.pull_request.number }}
-      uses: peter-evans/find-comment@v3
+      uses: peter-evans/find-comment@60c57613a233a2143853d3f68874167868b5d040
       id: fc
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -24,7 +24,7 @@ runs:
         body-includes: ${{ inputs.title }}
     - name: Create PR comment
       if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id == '' }}
-      uses: peter-evans/create-or-update-comment@v4
+      uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
@@ -33,7 +33,7 @@ runs:
           ${{ inputs.comment }}
     - name: Update PR comment
       if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id != '' }}
-      uses: peter-evans/create-or-update-comment@v4
+      uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         edit-mode: replace
@@ -43,7 +43,7 @@ runs:
           ${{ inputs.comment }}
     - name: Create Commit comment
       if: ${{ !github.event.pull_request.number }}
-      uses: peter-evans/commit-comment@v3
+      uses: peter-evans/commit-comment@1d732d08f4ceed8b5960ae40d4206620a3b8d38f
       with:
         body: |
           **${{ inputs.title }}**
