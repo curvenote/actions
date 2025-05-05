@@ -59,6 +59,12 @@ on:
           If no label is supplied, the submission will run on all PRs.
         required: false
         type: string
+      debug:
+        description: |
+          Run curvenote commands in debug mode for verbose log messages
+        required: false
+        default: 'false'
+        type: string
       ref:
         description: |
           The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow,
@@ -139,10 +145,13 @@ jobs:
           images: false
       - name: Run curvenote check
         run: |
+          if [ "${{ inputs.debug }}" = "true" ]; then
+            DEBUG="-d"
+          fi
           if [ -n "${{ inputs.collection }}" ]; then
             COLLECTION="--collection ${{ inputs.collection }}"
           fi
-          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION -d
+          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION $DEBUG
         working-directory: ${{ matrix.working-directory }}
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
@@ -172,6 +181,7 @@ jobs:
           venue: ${{ inputs.venue }}
           collection: ${{ inputs.collection }}
           kind: ${{ inputs.kind }}
+          debug: ${{ inputs.debug }}
           working-directory: ${{ matrix.working-directory }}
           draft: false
           publish: ${{ inputs.publish }}
