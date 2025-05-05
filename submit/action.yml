@@ -25,7 +25,7 @@ inputs:
   draft:
     description: Flag to indicate if the submission should be a draft
     default: false
-  draft:
+  debug:
     description: Flag to indicate if the curvenote commands should run in debug mode
     default: false
   publish:
