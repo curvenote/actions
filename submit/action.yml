@@ -25,6 +25,9 @@ inputs:
   draft:
     description: Flag to indicate if the submission should be a draft
     default: false
+  debug:
+    description: Flag to indicate if the curvenote commands should run in debug mode
+    default: false
   publish:
     description: |
       Flag to indicate if the submission should be immediately published without additional review
@@ -38,13 +41,16 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       shell: bash
       run: |
+        if [ "${{ inputs.debug }}" = "true" ]; then
+          DEBUG="-d"
+        fi
         if [ "${{ inputs.draft }}" = "true" ]; then
           DRAFT="--draft"
         fi
         if [ -n "${{ inputs.collection }}" ]; then
           COLLECTION="--collection ${{ inputs.collection }}"
         fi
-        curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION $DRAFT -y -d
+        curvenote submit ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION $DRAFT $DEBUG -y
     - name: Publish submission
       if: ${{ inputs.publish == 'true' && !(inputs.draft == 'true') }}
       working-directory: ${{ inputs.working-directory }}

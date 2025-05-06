@@ -51,6 +51,16 @@ on:
         required: false
         default: 'false'
         type: string
+      include-unchanged:
+        description: |
+          By default, the strategy will only identify folders with changes and run the action
+          on those. Unchanged folders will be ignored.
+
+          However, if `include-unchanged` is `true`, the action will be run under all folders
+          under `path`
+        required: false
+        default: 'false'
+        type: string
       label:
         description: |
           A pull request label that indicates the preview should be run.
@@ -58,6 +68,12 @@ on:
 
           If no label is supplied, the preview will run on all PRs.
         required: false
+        type: string
+      debug:
+        description: |
+          Run curvenote commands in debug mode for verbose log messages
+        required: false
+        default: 'false'
         type: string
       ref:
         description: |
@@ -107,6 +123,7 @@ jobs:
           enforce-single-folder: ${{ inputs.enforce-single-folder }}
           id-pattern-regex: ${{ inputs.id-pattern-regex }}
           preview-label: ${{ inputs.label || true }}
+          include-unchanged: ${{ inputs.include-unchanged }}
   submit-draft:
     needs: strategy
     runs-on: ubuntu-latest
@@ -131,6 +148,7 @@ jobs:
           venue: ${{ inputs.venue }}
           collection: ${{ inputs.collection }}
           kind: ${{ inputs.kind }}
+          debug: ${{ inputs.debug }}
           working-directory: ${{ matrix.working-directory }}
           draft: true
   check:
@@ -152,10 +170,13 @@ jobs:
       # Note, the collection shouldn't be necessary:
       - name: Run curvenote check
         run: |
+          if [ "${{ inputs.debug }}" = "true" ]; then
+            DEBUG="-d"
+          fi
           if [ -n "${{ inputs.collection }}" ]; then
             COLLECTION="--collection ${{ inputs.collection }}"
           fi
-          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION -d
+          curvenote check ${{ inputs.venue }} --kind "${{ inputs.kind }}" $COLLECTION $DEBUG
         working-directory: ${{ matrix.working-directory }}
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}

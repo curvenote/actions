@@ -81,6 +81,7 @@ function pathStartsWith(fullPath: string, basePath: string) {
  *
  * @param allowedPaths The directories that are expected to have changes in them
  * @param changedFiles The list of changed files
+ * @param includeUnchanged If true, all allowed paths are returned without filtering
  * @returns
  *   `filteredPaths`: Allowed paths from your input that have corresponding changes in changedFiles.
  *   `unknownChangedFiles`: Files that were changed but don't fall under the directories specified by your allowed paths input.
@@ -88,7 +89,17 @@ function pathStartsWith(fullPath: string, basePath: string) {
 export function filterPathsAndIdentifyUnknownChanges(
   allowedPaths: string[],
   changedFiles: string[],
+  includeUnchanged?: boolean,
 ): { filteredPaths: string[]; unknownChangedFiles: string[] } {
+  // Identify changed files that are outside the specified paths
+  const unknownChangedFiles = changedFiles.filter((changed) => {
+    // Check if this file's base path does not start with any of the paths
+    return !allowedPaths.some((allowed) => pathStartsWith(changed, allowed));
+  });
+  // If including unchanged paths, return all allowed paths as filtered paths
+  if (includeUnchanged) {
+    return { filteredPaths: allowedPaths, unknownChangedFiles };
+  }
   // Extract base paths from changedFiles
   const changedPaths = changedFiles
     .map((file) => {
@@ -105,13 +116,6 @@ export function filterPathsAndIdentifyUnknownChanges(
   const filteredPaths = allowedPaths.filter((allowed) => {
     return uniqueChangedPaths.some((changed) => pathStartsWith(changed, allowed));
   });
-
-  // Identify changed files that are outside the specified paths
-  const unknownChangedFiles = changedFiles.filter((changed) => {
-    // Check if this file's base path does not start with any of the paths
-    return !allowedPaths.some((allowed) => pathStartsWith(changed, allowed));
-  });
-
   // If '.' path is allowed, all changes are valid
   if (allowedPaths.includes('.')) {
     return { filteredPaths: [...filteredPaths, '.'], unknownChangedFiles: [] };
