@@ -34,6 +34,17 @@ inputs:
       The default path is the root of the repository.
     required: false
     default: '.'
+  exclude:
+    description: |
+      Paths to exclude from the workflow. These `exclude` paths are defined in the
+      same way as `path`. For example, if you want to exclude two example folders:
+
+      ```yaml
+      path: papers/*
+      exclude: papers/example_1, papers/example_2
+      ```
+    required: false
+    type: string
   id-pattern-regex:
     description: |
       A regular expression that all IDs must follow, by default this matches a UUID.

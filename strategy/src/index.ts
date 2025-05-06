@@ -17,7 +17,13 @@ import {
     return;
   }
   const octokit = new Octokit({ auth: githubToken });
-  const paths = await resolvePaths('', core.getInput('path'));
+  let paths = await resolvePaths('', core.getInput('path'));
+  const exclude = core.getInput('exclude');
+  if (exclude) {
+    const excludePaths = await resolvePaths('', exclude);
+    paths = paths.filter((path) => !excludePaths.includes(path));
+  }
+
   const includeUnchanged = core.getInput('include-unchanged') === 'true';
   const { assignees, reviewers } = (await getPullRequestReviewers(octokit)) ?? {};
 
