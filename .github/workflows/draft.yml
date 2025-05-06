@@ -59,7 +59,8 @@ on:
           However, if `include-unchanged` is `true`, the action will be run under all folders
           under `path`
         required: false
-        default: false
+        default: 'false'
+        type: string
       label:
         description: |
           A pull request label that indicates the preview should be run.
