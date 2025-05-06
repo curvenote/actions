@@ -18,6 +18,7 @@ import {
   }
   const octokit = new Octokit({ auth: githubToken });
   const paths = await resolvePaths('', core.getInput('path'));
+  const includeUnchanged = core.getInput('include-unchanged') === 'true';
   const { assignees, reviewers } = (await getPullRequestReviewers(octokit)) ?? {};
 
   const previewLabel = booleanOrLabels(core.getInput('preview-label'));
@@ -41,6 +42,7 @@ import {
   const { filteredPaths, unknownChangedFiles } = filterPathsAndIdentifyUnknownChanges(
     paths,
     changedFiles,
+    includeUnchanged,
   );
 
   console.log(
