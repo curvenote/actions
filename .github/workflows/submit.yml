@@ -43,6 +43,17 @@ on:
         required: false
         default: '.'
         type: string
+      exclude:
+        description: |
+          Paths to exclude from the workflow. These `exclude` paths are defined in the
+          same way as `path`. For example, if you want to exclude two example folders:
+
+          ```yaml
+          path: papers/*
+          exclude: papers/example_1, papers/example_2
+          ```
+        required: false
+        type: string
       enforce-single-folder:
         description: |
           When true, an error will be raised if a pull request is touching multiple
