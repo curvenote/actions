@@ -38,7 +38,7 @@ runs:
         issue-number: ${{ github.event.pull_request.number }}
         comment-author: 'github-actions[bot]'
         # later steps dependent on the text of this comment; if you change it here, also change it there.
-        body-includes: These previews are stale and may not reflect the most recent commit.
+        body-includes: These previews are stale and may not reflect the current state of this PR.
     # If no comment exists at all, make a new comment.
     - name: Create new PR comment
       if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id == '' }}
@@ -74,7 +74,7 @@ runs:
         body: |
           ${{ steps.fc.outputs.comment-body }}
 
-          🚧 These previews are stale and may not reflect the most recent commit. 🚧
+          🚧 These previews are stale and may not reflect the current state of this PR. 🚧
     - name: Create Commit comment
       if: ${{ !github.event.pull_request.number }}
       uses: peter-evans/commit-comment@1d732d08f4ceed8b5960ae40d4206620a3b8d38f
