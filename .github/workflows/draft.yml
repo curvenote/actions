@@ -51,6 +51,15 @@ on:
         required: false
         default: 'false'
         type: string
+      include-unchanged:
+        description: |
+          By default, the strategy will only identify folders with changes and run the action
+          on those. Unchanged folders will be ignored.
+
+          However, if `include-unchanged` is `true`, the action will be run under all folders
+          under `path`
+        required: false
+        default: false
       label:
         description: |
           A pull request label that indicates the preview should be run.
@@ -113,6 +122,7 @@ jobs:
           enforce-single-folder: ${{ inputs.enforce-single-folder }}
           id-pattern-regex: ${{ inputs.id-pattern-regex }}
           preview-label: ${{ inputs.label || true }}
+          include-unchanged: ${{ inputs.include-unchanged }}
   submit-draft:
     needs: strategy
     runs-on: ubuntu-latest
