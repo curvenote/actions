@@ -145,6 +145,7 @@ jobs:
         with:
           changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
           path: ${{ inputs.path }}
+          exclude: ${{ inputs.exclude }}
           enforce-single-folder: ${{ inputs.enforce-single-folder }}
           id-pattern-regex: ${{ inputs.id-pattern-regex }}
           submit-label: ${{ inputs.label || true }}
