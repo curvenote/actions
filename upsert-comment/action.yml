@@ -22,7 +22,25 @@ runs:
         issue-number: ${{ github.event.pull_request.number }}
         comment-author: 'github-actions[bot]'
         body-includes: ${{ inputs.title }}
-    - name: Create PR comment
+    - name: Find "no submissions" PR Comment
+      if: ${{ github.event.pull_request.number }}
+      uses: peter-evans/find-comment@60c57613a233a2143853d3f68874167868b5d040
+      id: fc-no-subs
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: No submissions available to inspect.
+    - name: Find "stale" PR Comment
+      if: ${{ github.event.pull_request.number }}
+      uses: peter-evans/find-comment@60c57613a233a2143853d3f68874167868b5d040
+      id: fc-stale
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        # later steps dependent on the text of this comment; if you change it here, also change it there.
+        body-includes: These previews are stale and may not reflect the most recent commit.
+    # If no comment exists at all, make a new comment.
+    - name: Create new PR comment
       if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id == '' }}
       uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
       with:
@@ -31,8 +49,9 @@ runs:
           **${{ inputs.title }}**
 
           ${{ inputs.comment }}
+    # If the new comment is "success" (i.e. not "no submission available"), replace the previous comment
     - name: Update PR comment
-      if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id != '' }}
+      if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id != '' && !contains(inputs.comment, 'No submissions available to inspect.') }}
       uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
@@ -41,6 +60,21 @@ runs:
           **${{ inputs.title }}**
 
           ${{ inputs.comment }}
+    # If:
+    # - a comment already exists
+    # - the existing comment is "success" (i.e. neither "no submission available" nor "stale")
+    # - the new comment is "no submission available"
+    # Then: append the "stale" message to the existing comment.
+    - name: Append "stale" message to existing "successful" comment
+      if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id != '' && steps.fc-no-subs.outputs.comment-id == '' && steps.fc-stale.outputs.comment-id == '' && contains(inputs.comment, 'No submissions available to inspect.') }}
+      uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          ${{ steps.fc.outputs.comment-body }}
+
+          🚧 These previews are stale and may not reflect the most recent commit. 🚧
     - name: Create Commit comment
       if: ${{ !github.event.pull_request.number }}
       uses: peter-evans/commit-comment@1d732d08f4ceed8b5960ae40d4206620a3b8d38f
