@@ -61,6 +61,7 @@ function reportSummaryMessage(report: Report | undefined, buildUrl: string) {
     ),
   );
   if (!fs.existsSync('logs')) {
+    // upsert-comment is dependent on the text of this comment; if you change it here, also change it there.
     core.setOutput('comment', '📭 No submissions available to inspect.');
     return;
   }
