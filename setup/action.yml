@@ -25,7 +25,8 @@ runs:
       uses: typst-community/setup-typst@468250b312a80ba1ce98072d08f4d20cc49d268c
     - name: Install Fonts for Typst PDF builds
       if: ${{ inputs.typst == 'true' }}
-      run: apt-get install fonts-noto
+      run: sudo apt-get install fonts-noto
+      shell: bash
     - name: Install image transformation utilities
       if: ${{ inputs.images == 'true' }}
       shell: bash
