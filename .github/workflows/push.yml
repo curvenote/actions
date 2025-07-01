@@ -1,0 +1,32 @@
+name: push
+on:
+  workflow_call:
+    inputs:
+      landing-content:
+        description: Optional landing content for site initialization
+        required: false
+        type: string
+      debug:
+        description: Flag to indicate if the curvenote commands should run in debug mode
+        default: false
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: curvenote/actions/setup@main
+      - name: Run Curvenote Push
+        shell: bash
+        run: |
+          if [ "${{ inputs.debug }}" = "true" ]; then
+            DEBUG="-d"
+          fi
+          curvenote work push $DEBUG -y
+      - name: Set Landing Content (optional)
+        if: ${{ github.event.inputs['landing-content'] != '' }}
+        shell: bash
+        run: |
+          if [ "${{ inputs.debug }}" = "true" ]; then
+            DEBUG="-d"
+          fi
+          curvenote site init ${{ github.event.inputs['landing-content'] }} $DEBUG --set-content
