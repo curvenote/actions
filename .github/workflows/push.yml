@@ -15,14 +15,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: curvenote/actions/setup@main
-      - name: Run Curvenote Push
+      - name: Run Curvenote Push (private)
+        if: ${{ github.event.inputs['landing-content'] == '' }}
         shell: bash
         run: |
           if [ "${{ inputs.debug }}" = "true" ]; then
             DEBUG="-d"
           fi
           curvenote work push $DEBUG -y
-      - name: Set Landing Content (optional)
+      - name: Run Curvenote Push (public)
+        if: ${{ github.event.inputs['landing-content'] != '' }}
+        shell: bash
+        run: |
+          if [ "${{ inputs.debug }}" = "true" ]; then
+            DEBUG="-d"
+          fi
+          curvenote work push $DEBUG --public -y
+      - name: Set Site Landing Content
         if: ${{ github.event.inputs['landing-content'] != '' }}
         shell: bash
         run: |
