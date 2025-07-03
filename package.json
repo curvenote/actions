@@ -1,7 +1,7 @@
 {
   "name": "@curvenote/actions",
   "private": true,
-  "version": "1.0.15",
+  "version": "1.0.16",
   "workspaces": [
     "strategy",
     "submit-summary"

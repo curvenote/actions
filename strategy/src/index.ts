@@ -115,16 +115,15 @@ These files are outside of an allowed folder path:
   core.setOutput('submit', doSubmit);
   core.setOutput('check', doPreview || doSubmit);
   // Set the build matrix
-  core.setOutput(
-    'matrix',
-    JSON.stringify({
-      include: filteredPaths.map((p) => ({
-        id: pathIds[p],
-        'working-directory': p,
-        draft: !doSubmit,
-      })),
-    }),
-  );
+  const matrix = {
+    include: filteredPaths.map((p) => ({
+      id: pathIds[p],
+      'working-directory': p,
+      draft: !doSubmit,
+    })),
+  };
+  console.log('Matrix:\n\n', JSON.stringify(matrix, null, 2), '\n\n');
+  core.setOutput('matrix', JSON.stringify(matrix));
 })().catch((err) => {
   core.error(err);
   core.setFailed(err.message);
