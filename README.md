@@ -2,11 +2,15 @@
 
 These actions allow you to connect your github repository with [MyST](https://mystmd.org) content to a Curvenote site and run your editorial workflow from pull requests.
 
-Currently there are two actions available:
+Currently there are three actions available:
 
 1. `draft.yml` to create preview drafts and run journal checks
 
 1. `submit.yml` to submit to a journal
+
+1. `push.yml` to push a work to Curvenote and add as landing content for a site
+
+# Journal Submissions
 
 ## Get Started: Create a draft from your repository
 
@@ -184,3 +188,35 @@ Of course, this workflow could also be triggered `on` push to `main` or even set
    Stop submission if checks fail. By default, strict is `false` and submissions always proceed even if checks fail. This allows editors flexibility to publish a submission even if a check fails (e.g. a link does not resolve).
 
    For this example, however, strict is set to `true`; during the submit workflow, the submission will not be attempted if checks fail. One major caveat here is without the submission, check results are also not uploaded to the Curvenote preview. This means for an effective submission workflow, the author must have access to checks from the `draft` action so they may review and fix their content.
+
+# Work Pushing
+
+Currently, pushing a Work to Curvenote is a simpler action than journal submissions. Pushing your work will upload a version to the Curvenote platform, which may then subsequently be used for journal submissions or site landing content. The push action currently only acts on the root folder of your repository. A simple usage of this action to push on merge to main looks like:
+
+```yaml
+name: curvenote push
+on:
+  push:
+    branches: ['main']
+jobs:
+  journal-draft:
+    uses: curvenote/actions/.github/workflows/push.yml@v1
+    secrets:
+      CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
+```
+
+You may also use this action to set the landing content for a Curvenote site. You must have admin privileges on the Site:
+
+```yaml
+name: curvenote push
+on:
+  push:
+    branches: ['main']
+jobs:
+  journal-draft:
+    uses: curvenote/actions/.github/workflows/push.yml@v1
+    with:
+      landing-content: '<SITE-NAME>'
+    secrets:
+      CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
+```
