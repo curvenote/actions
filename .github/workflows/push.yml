@@ -11,6 +11,10 @@ on:
         required: false
         default: 'false'
         type: string
+    secrets:
+      CURVENOTE:
+        description: Curvenote API token (usually `secrets.CURVENOTE_TOKEN`)
+        required: true
 jobs:
   push:
     runs-on: ubuntu-latest
@@ -20,6 +24,8 @@ jobs:
       - name: Run Curvenote Push (private)
         if: ${{ github.event.inputs['landing-content'] == '' }}
         shell: bash
+        env:
+          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         run: |
           if [ "${{ inputs.debug }}" = "true" ]; then
             DEBUG="-d"
@@ -28,6 +34,8 @@ jobs:
       - name: Run Curvenote Push (public)
         if: ${{ github.event.inputs['landing-content'] != '' }}
         shell: bash
+        env:
+          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         run: |
           if [ "${{ inputs.debug }}" = "true" ]; then
             DEBUG="-d"
@@ -36,6 +44,8 @@ jobs:
       - name: Set Site Landing Content
         if: ${{ github.event.inputs['landing-content'] != '' }}
         shell: bash
+        env:
+          CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         run: |
           if [ "${{ inputs.debug }}" = "true" ]; then
             DEBUG="-d"
