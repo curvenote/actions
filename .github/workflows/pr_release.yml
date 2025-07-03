@@ -27,6 +27,7 @@ jobs:
           sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/publish.yml
           sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/draft.yml
           sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/submit.yml
+          sed -i s/@main/@PR${{ github.event.number }}/g .github/workflows/push.yml
       - name: Build dist content
         run: |
           npm install
@@ -38,6 +39,7 @@ jobs:
           git add .github/workflows/publish.yml
           git add .github/workflows/draft.yml
           git add .github/workflows/submit.yml
+          git add .github/workflows/push.yml
           git add -f strategy/dist
           git add -f submit-summary/dist
           git commit -m "🧪 PR${{ github.event.number }}"

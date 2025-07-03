@@ -54,6 +54,7 @@ jobs:
           sed -i s/@main/@latest/g .github/workflows/publish.yml
           sed -i s/@main/@latest/g .github/workflows/draft.yml
           sed -i s/@main/@latest/g .github/workflows/submit.yml
+          sed -i s/@main/@latest/g .github/workflows/push.yml
       - name: Build dist content
         run: |
           npm install
@@ -65,6 +66,7 @@ jobs:
           git add .github/workflows/publish.yml
           git add .github/workflows/draft.yml
           git add .github/workflows/submit.yml
+          git add .github/workflows/push.yml
           git add -f strategy/dist
           git add -f submit-summary/dist
           git commit -m "🔧 Latest"
@@ -98,6 +100,7 @@ jobs:
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/publish.yml
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/draft.yml
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/submit.yml
+          sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/push.yml
       - name: Build dist content
         run: |
           npm install
@@ -109,6 +112,7 @@ jobs:
           git add .github/workflows/publish.yml
           git add .github/workflows/draft.yml
           git add .github/workflows/submit.yml
+          git add .github/workflows/push.yml
           git add -f strategy/dist
           git add -f submit-summary/dist
           git commit -m "🚀 ${{ needs.prepare.outputs.version }}"
