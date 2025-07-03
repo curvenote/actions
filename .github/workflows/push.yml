@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: curvenote/actions/setup@main
       - name: Run Curvenote Push (private)
-        if: ${{ github.event.inputs['landing-content'] == '' }}
+        if: ${{ inputs.landing-content == '' }}
         shell: bash
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
@@ -32,7 +32,7 @@ jobs:
           fi
           curvenote work push $DEBUG -y
       - name: Run Curvenote Push (public)
-        if: ${{ github.event.inputs['landing-content'] != '' }}
+        if: ${{ inputs.landing-content != '' }}
         shell: bash
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
@@ -42,7 +42,7 @@ jobs:
           fi
           curvenote work push $DEBUG --public -y
       - name: Set Site Landing Content
-        if: ${{ github.event.inputs['landing-content'] != '' }}
+        if: ${{ inputs.landing-content != '' }}
         shell: bash
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
@@ -50,4 +50,4 @@ jobs:
           if [ "${{ inputs.debug }}" = "true" ]; then
             DEBUG="-d"
           fi
-          curvenote site init ${{ github.event.inputs['landing-content'] }} $DEBUG --set-content
+          curvenote site init ${{ inputs.landing-content }} $DEBUG --set-content
