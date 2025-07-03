@@ -7,8 +7,10 @@ on:
         required: false
         type: string
       debug:
-        description: Flag to indicate if the curvenote commands should run in debug mode
-        default: false
+        description: Run curvenote commands in debug mode for verbose log messages
+        required: false
+        default: 'false'
+        type: string
 jobs:
   push:
     runs-on: ubuntu-latest
