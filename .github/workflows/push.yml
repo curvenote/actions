@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: curvenote/actions/setup@main
+      - uses: curvenote/actions/setup@v1.0.16
       - name: Run Curvenote Push (private)
         if: ${{ inputs.landing-content == '' }}
         shell: bash
