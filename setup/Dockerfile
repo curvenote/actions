@@ -18,9 +18,6 @@ RUN apt-get update && \
 # Patch ImageMagick policy to allow PDF -> PNG conversions
 RUN sed -i '/domain="coder" rights="none"/d' /etc/ImageMagick-6/policy.xml
 
-# Install curvenote CLI
-RUN npm install -g curvenote
-
 # Install typst
 RUN curl -fsSL https://typst.community/typst-install/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
