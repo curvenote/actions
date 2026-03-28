@@ -153,6 +153,8 @@ jobs:
   check:
     needs: strategy
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/curvenote/actions/setup:latest
     if: ${{ toJson(fromJson(needs.strategy.outputs.matrix).include) != '[]' && needs.strategy.outputs.check == 'true'}}
     strategy:
       fail-fast: false
@@ -183,6 +185,8 @@ jobs:
       - strategy
       - check
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/curvenote/actions/setup:latest
     if: ${{ toJson(fromJson(needs.strategy.outputs.matrix).include) != '[]' && needs.strategy.outputs.submit == 'true' && (!failure() || !inputs.strict) }}
     concurrency:
       group: submit-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}

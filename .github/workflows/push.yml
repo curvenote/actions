@@ -18,6 +18,8 @@ on:
 jobs:
   push:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/curvenote/actions/setup:latest
     steps:
       - uses: actions/checkout@v4
       - uses: curvenote/actions/setup@main
