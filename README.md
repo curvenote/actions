@@ -189,6 +189,9 @@ Of course, this workflow could also be triggered `on` push to `main` or even set
 
    For this example, however, strict is set to `true`; during the submit workflow, the submission will not be attempted if checks fail. One major caveat here is without the submission, check results are also not uploaded to the Curvenote preview. This means for an effective submission workflow, the author must have access to checks from the `draft` action so they may review and fix their content.
 
+1. **`publish` (boolean)**
+   When `true`, the submission is published immediately after a successful submit, bypassing manual review of the preview. The Curvenote token must have permission to publish. Do not use this for venues where untrusted authors can control what gets published, because it gives them a path to publish without an editor gate.
+
 # Work Pushing
 
 Currently, pushing a Work to Curvenote is a simpler action than journal submissions. Pushing your work will upload a version to the Curvenote platform, which may then subsequently be used for journal submissions or site landing content. The push action currently only acts on the root folder of your repository. A simple usage of this action to push on merge to main looks like:
@@ -220,3 +223,20 @@ jobs:
     secrets:
       CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
 ```
+
+# Additional Options
+
+These optional inputs may be used with the `draft`, `submit`, or `push` actions. They are passed through to the setup step or Curvenote CLI as described for each option below.
+
+1. **`debug` (string)**
+   Set to `true` to run Curvenote commands with debug logging for easier troubleshooting. Default is `false`.
+
+1. **`typst` (string)**
+   When `true`, installs [Typst](https://typst.app) for PDF rendering in the setup step. Set to `false` to skip Typst and font installation. Default is `true`.
+
+1. **`fonts` (string)**
+   Debian package name(s) passed to `apt-get install` for fonts used with Typst PDF builds (only when `typst` is `true`). Default is `fonts-noto`.
+
+1. **`images` (string)**
+   When `true`, installs image conversion tooling (for example Inkscape and ImageMagick) used by the build. Set to `false` to skip. Default is `true`.
+
