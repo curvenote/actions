@@ -8,6 +8,9 @@ inputs:
   typst:
     description: Install typst for PDF rendering
     default: 'true'
+  fonts:
+    description: Fonts to install for typst PDF builds
+    default: 'fonts-noto'
   images:
     description: Install image transformation tools
     default: 'true'
@@ -25,7 +28,7 @@ runs:
       uses: typst-community/setup-typst@468250b312a80ba1ce98072d08f4d20cc49d268c
     - name: Install Fonts for Typst PDF builds
       if: ${{ inputs.typst == 'true' }}
-      run: sudo apt-get install fonts-noto
+      run: sudo apt-get install ${{ inputs.fonts }}
       shell: bash
     - name: Install image transformation utilities
       if: ${{ inputs.images == 'true' }}
