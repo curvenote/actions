@@ -26,6 +26,10 @@ on:
         required: false
         default: 'true'
         type: string
+      path:
+        description: Repository subdirectory with work content
+        required: false
+        type: string
     secrets:
       CURVENOTE:
         description: Curvenote API token (usually `secrets.CURVENOTE_TOKEN`)
@@ -46,6 +50,9 @@ jobs:
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         run: |
+          if [ -n "${{ inputs.path }}" ]; then
+            cd "${{ inputs.path }}"
+          fi
           if [ "${{ inputs.debug }}" = "true" ]; then
             DEBUG="-d"
           fi
@@ -56,6 +63,9 @@ jobs:
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         run: |
+          if [ -n "${{ inputs.path }}" ]; then
+            cd "${{ inputs.path }}"
+          fi
           if [ "${{ inputs.debug }}" = "true" ]; then
             DEBUG="-d"
           fi
@@ -66,6 +76,9 @@ jobs:
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         run: |
+          if [ -n "${{ inputs.path }}" ]; then
+            cd "${{ inputs.path }}"
+          fi
           if [ "${{ inputs.debug }}" = "true" ]; then
             DEBUG="-d"
           fi

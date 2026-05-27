@@ -194,7 +194,7 @@ Of course, this workflow could also be triggered `on` push to `main` or even set
 
 # Work Pushing
 
-Currently, pushing a Work to Curvenote is a simpler action than journal submissions. Pushing your work will upload a version to the Curvenote platform, which may then subsequently be used for journal submissions or site landing content. The push action currently only acts on the root folder of your repository. A simple usage of this action to push on merge to main looks like:
+Currently, pushing a Work to Curvenote is a simpler action than journal submissions. Pushing your work will upload a version to the Curvenote platform, which may then subsequently be used for journal submissions or site landing content. By default, the push action acts at the repository root; use the optional `path` input to run from a subdirectory instead. A simple usage of this action to push on merge to main looks like:
 
 ```yaml
 name: curvenote push
@@ -239,4 +239,7 @@ These optional inputs may be used with the `draft`, `submit`, or `push` actions.
 
 1. **`images` (string)**
    When `true`, installs image conversion tooling (for example Inkscape and ImageMagick) used by the build. Set to `false` to skip. Default is `true`.
+
+1. **`path` (string)** — `push` only
+   Repository subdirectory the push action acts. If omitted, it will run at the repository root.
 
