@@ -196,8 +196,9 @@ jobs:
           fetch-depth: 1
       - uses: curvenote/actions/setup@main
         with:
-          typst: false
-          images: false
+          typst: ${{ inputs.typst }}
+          fonts: ${{ inputs.fonts }}
+          images: ${{ inputs.images }}
       # Note, the collection shouldn't be necessary:
       - name: Run curvenote check
         run: |
