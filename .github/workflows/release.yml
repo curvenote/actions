@@ -5,7 +5,6 @@ on:
       - main
 permissions:
   contents: read
-  packages: write
 jobs:
   prepare:
     name: Decide if Versioned Release is Required
@@ -52,44 +51,12 @@ jobs:
       - name: Checkout temporary branch
         run: |
           git checkout -b release/latest
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push full CLI image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: docker/Dockerfile
-          target: full
-          push: true
-          tags: |
-            ghcr.io/curvenote/actions/cli:main
-            ghcr.io/curvenote/actions/cli:latest
-      - name: Build and push slim CLI image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: docker/Dockerfile
-          target: slim
-          push: true
-          tags: |
-            ghcr.io/curvenote/actions/cli:main-slim
-            ghcr.io/curvenote/actions/cli:latest-slim
       - name: Stamp latest into workflows
         run: |
           sed -i s/@main/@latest/g .github/workflows/publish.yml
           sed -i s/@main/@latest/g .github/workflows/draft.yml
           sed -i s/@main/@latest/g .github/workflows/submit.yml
           sed -i s/@main/@latest/g .github/workflows/push.yml
-          sed -i 's|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:latest|g' .github/workflows/publish.yml
-          sed -i 's|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:latest|g' .github/workflows/draft.yml
-          sed -i 's|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:latest|g' .github/workflows/submit.yml
-          sed -i 's|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:latest|g' .github/workflows/push.yml
       - name: Build dist content
         run: |
           npm install
@@ -130,60 +97,12 @@ jobs:
       - name: Checkout temporary branch
         run: |
           git checkout -b release/${{ needs.prepare.outputs.version }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Resolve image tags
-        id: image-tags
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          MINOR=$(echo "$VERSION" | cut -d. -f1-2)
-          MAJOR=$(echo "$VERSION" | cut -d. -f1)
-          echo "major=${MAJOR}" >> "$GITHUB_OUTPUT"
-          {
-            echo "full<<EOF"
-            echo "ghcr.io/curvenote/actions/cli:${VERSION}"
-            echo "ghcr.io/curvenote/actions/cli:${MINOR}"
-            echo "ghcr.io/curvenote/actions/cli:${MAJOR}"
-            echo "EOF"
-            echo "slim<<EOF"
-            echo "ghcr.io/curvenote/actions/cli:${VERSION}-slim"
-            echo "ghcr.io/curvenote/actions/cli:${MINOR}-slim"
-            echo "ghcr.io/curvenote/actions/cli:${MAJOR}-slim"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-      - name: Build and push full CLI image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: docker/Dockerfile
-          target: full
-          push: true
-          tags: ${{ steps.image-tags.outputs.full }}
-      - name: Build and push slim CLI image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: docker/Dockerfile
-          target: slim
-          push: true
-          tags: ${{ steps.image-tags.outputs.slim }}
       - name: Stamp version into workflows
         run: |
-          MAJOR="${{ steps.image-tags.outputs.major }}"
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/publish.yml
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/draft.yml
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/submit.yml
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/push.yml
-          sed -i "s|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:${MAJOR}|g" .github/workflows/publish.yml
-          sed -i "s|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:${MAJOR}|g" .github/workflows/draft.yml
-          sed -i "s|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:${MAJOR}|g" .github/workflows/submit.yml
-          sed -i "s|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:${MAJOR}|g" .github/workflows/push.yml
       - name: Build dist content
         run: |
           npm install

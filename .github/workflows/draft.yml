@@ -163,7 +163,7 @@ jobs:
     needs: strategy
     runs-on: ubuntu-latest
     container:
-      image: ${{ (inputs.typst == 'true' || inputs.images == 'true') && 'ghcr.io/curvenote/actions/cli:main' || 'ghcr.io/curvenote/actions/cli:main-slim' }}
+      image: ${{ (inputs.typst == 'true' || inputs.images == 'true') && 'ghcr.io/curvenote/cli:latest' || 'ghcr.io/curvenote/cli:latest-slim' }}
     concurrency:
       group: draft-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
       cancel-in-progress: true
@@ -178,8 +178,6 @@ jobs:
           fetch-depth: 1
           # Required for pull_request_target journal monorepos that checkout fork PR heads.
           allow-unsafe-pr-checkout: true
-      - name: Update Curvenote CLI
-        run: npm install -g curvenote@latest
       - name: Install custom fonts
         if: ${{ inputs.typst == 'true' && inputs.fonts != 'fonts-noto' }}
         run: |
@@ -200,7 +198,7 @@ jobs:
     needs: strategy
     runs-on: ubuntu-latest
     container:
-      image: ${{ (inputs.typst == 'true' || inputs.images == 'true') && 'ghcr.io/curvenote/actions/cli:main' || 'ghcr.io/curvenote/actions/cli:main-slim' }}
+      image: ${{ (inputs.typst == 'true' || inputs.images == 'true') && 'ghcr.io/curvenote/cli:latest' || 'ghcr.io/curvenote/cli:latest-slim' }}
     if: ${{ toJson(fromJson(needs.strategy.outputs.matrix).include) != '[]' && needs.strategy.outputs.check == 'true'}}
     strategy:
       fail-fast: false
@@ -212,8 +210,6 @@ jobs:
           fetch-depth: 1
           # Required for pull_request_target journal monorepos that checkout fork PR heads.
           allow-unsafe-pr-checkout: true
-      - name: Update Curvenote CLI
-        run: npm install -g curvenote@latest
       - name: Install custom fonts
         if: ${{ inputs.typst == 'true' && inputs.fonts != 'fonts-noto' }}
         run: |

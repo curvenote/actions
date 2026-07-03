@@ -140,7 +140,7 @@ jobs:
     needs: strategy
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/curvenote/actions/cli:main
+      image: ghcr.io/curvenote/cli:latest
     concurrency:
       group: preview-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}
       cancel-in-progress: true
@@ -154,8 +154,6 @@ jobs:
           fetch-depth: 1
           # Required for pull_request_target journal monorepos that checkout fork PR heads.
           allow-unsafe-pr-checkout: true
-      - name: Update Curvenote CLI
-        run: npm install -g curvenote@latest
       - uses: curvenote/actions/submit@main
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
@@ -170,7 +168,7 @@ jobs:
     needs: strategy
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/curvenote/actions/cli:main-slim
+      image: ghcr.io/curvenote/cli:latest-slim
     if: ${{ needs.strategy.outputs.check == 'true'}}
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
@@ -181,8 +179,6 @@ jobs:
           fetch-depth: 1
           # Required for pull_request_target journal monorepos that checkout fork PR heads.
           allow-unsafe-pr-checkout: true
-      - name: Update Curvenote CLI
-        run: npm install -g curvenote@latest
       # Note, the collection shouldn't be necessary:
       - run: |
           if [ -n "${{ inputs.collection }}" ]; then
