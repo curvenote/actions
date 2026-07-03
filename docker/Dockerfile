@@ -1,4 +1,4 @@
-FROM node:20-bookworm
+FROM node:24-bookworm
 
 ARG CURVENOTE_VERSION=latest
 ARG TYPST_VERSION=latest
