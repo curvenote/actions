@@ -20,7 +20,7 @@ Consumers pinned to `@v1` continue to work unchanged; the workflow pulls `ghcr.i
 
 - Node 20
 - Curvenote CLI (`curvenote@latest` at image build time)
-- Typst
+- Typst (latest release at image build time; same asset as `typst-community/setup-typst` on linux/x64)
 - Noto fonts
 - Inkscape, ImageMagick, WebP tools, Ghostscript
 
