@@ -137,6 +137,8 @@ jobs:
   preview:
     needs: strategy
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/curvenote/actions/cli:main
     concurrency:
       group: preview-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}
       cancel-in-progress: true
@@ -148,7 +150,6 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 1
-      - uses: curvenote/actions/setup@main
       - uses: curvenote/actions/submit@main
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
@@ -162,6 +163,8 @@ jobs:
   check:
     needs: strategy
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/curvenote/actions/cli:main
     if: ${{ needs.strategy.outputs.check == 'true'}}
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
@@ -170,10 +173,6 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 1
-      - uses: curvenote/actions/setup@main
-        with:
-          typst: false
-          images: false
       # Note, the collection shouldn't be necessary:
       - run: |
           if [ -n "${{ inputs.collection }}" ]; then

@@ -114,21 +114,6 @@ on:
           external authors, as it gives authors complete control over published content.
         default: false
         type: boolean
-      typst:
-        description: Install typst for PDF rendering
-        required: false
-        default: 'true'
-        type: string
-      fonts:
-        description: Fonts to install for typst PDF builds
-        required: false
-        default: 'fonts-noto'
-        type: string
-      images:
-        description: Install image transformation tools
-        required: false
-        default: 'true'
-        type: string
     secrets:
       GITHUB:
         description: GitHub API token (usually `env.GITHUB_TOKEN`)
@@ -168,6 +153,8 @@ jobs:
   check:
     needs: strategy
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/curvenote/actions/cli:main
     if: ${{ toJson(fromJson(needs.strategy.outputs.matrix).include) != '[]' && needs.strategy.outputs.check == 'true'}}
     strategy:
       fail-fast: false
@@ -177,11 +164,6 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
           fetch-depth: 1
-      - uses: curvenote/actions/setup@main
-        with:
-          typst: ${{ inputs.typst }}
-          fonts: ${{ inputs.fonts }}
-          images: ${{ inputs.images }}
       - name: Run curvenote check
         run: |
           if [ "${{ inputs.debug }}" = "true" ]; then
@@ -199,6 +181,8 @@ jobs:
       - strategy
       - check
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/curvenote/actions/cli:main
     if: ${{ toJson(fromJson(needs.strategy.outputs.matrix).include) != '[]' && needs.strategy.outputs.submit == 'true' && (!failure() || !inputs.strict) }}
     concurrency:
       group: submit-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
@@ -211,11 +195,6 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
           fetch-depth: 1
-      - uses: curvenote/actions/setup@main
-        with:
-          typst: ${{ inputs.typst }}
-          fonts: ${{ inputs.fonts }}
-          images: ${{ inputs.images }}
       - uses: curvenote/actions/submit@main
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}

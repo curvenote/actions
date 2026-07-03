@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - main
+permissions:
+  contents: read
+  packages: write
 jobs:
   prepare:
     name: Decide if Versioned Release is Required
@@ -49,12 +52,33 @@ jobs:
       - name: Checkout temporary branch
         run: |
           git checkout -b release/latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.WORKFLOW_TOKEN }}
+      - name: Build and push CLI image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/curvenote/actions/cli:main
+            ghcr.io/curvenote/actions/cli:latest
       - name: Stamp latest into workflows
         run: |
           sed -i s/@main/@latest/g .github/workflows/publish.yml
           sed -i s/@main/@latest/g .github/workflows/draft.yml
           sed -i s/@main/@latest/g .github/workflows/submit.yml
           sed -i s/@main/@latest/g .github/workflows/push.yml
+          sed -i 's|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:latest|g' .github/workflows/publish.yml
+          sed -i 's|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:latest|g' .github/workflows/draft.yml
+          sed -i 's|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:latest|g' .github/workflows/submit.yml
+          sed -i 's|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:latest|g' .github/workflows/push.yml
       - name: Build dist content
         run: |
           npm install
@@ -95,12 +119,36 @@ jobs:
       - name: Checkout temporary branch
         run: |
           git checkout -b release/${{ needs.prepare.outputs.version }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.WORKFLOW_TOKEN }}
+      - name: Build and push CLI image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/curvenote/actions/cli:${{ needs.prepare.outputs.version }}
+            ghcr.io/curvenote/actions/cli:$(echo ${{ needs.prepare.outputs.version }} | cut -d. -f1-2)
+            ghcr.io/curvenote/actions/cli:$(echo ${{ needs.prepare.outputs.version }} | cut -d. -f1)
+            ghcr.io/curvenote/actions/cli:latest
       - name: Stamp version into workflows
         run: |
+          MAJOR=$(echo ${{ needs.prepare.outputs.version }} | cut -d. -f1)
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/publish.yml
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/draft.yml
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/submit.yml
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/push.yml
+          sed -i "s|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:${MAJOR}|g" .github/workflows/publish.yml
+          sed -i "s|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:${MAJOR}|g" .github/workflows/draft.yml
+          sed -i "s|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:${MAJOR}|g" .github/workflows/submit.yml
+          sed -i "s|ghcr.io/curvenote/actions/cli:main|ghcr.io/curvenote/actions/cli:${MAJOR}|g" .github/workflows/push.yml
       - name: Build dist content
         run: |
           npm install
