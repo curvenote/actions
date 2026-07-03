@@ -231,8 +231,11 @@ These optional inputs may be used with the `draft`, `submit`, or `push` actions.
 1. **`debug` (string)**
    Set to `true` to run Curvenote commands with debug logging for easier troubleshooting. Default is `false`.
 
-1. **`typst` / `fonts` / `images` (string)** — deprecated
-   Accepted for compatibility with existing workflows. These have no effect; Typst, fonts, and image tools are always available in the workflow container image.
+1. **`typst` / `images` (string)**
+   Select the CLI container image. When either is `true` (the default), jobs use the full image with Typst, fonts, and image tools. Set both to `false` to use the smaller slim image (Curvenote CLI only).
+
+1. **`fonts` (string)**
+   Debian package name(s) for fonts used with Typst PDF builds (only when `typst` is `true`). Default is `fonts-noto`, which is included in the full image. Any other value is installed with `apt-get` at runtime.
 
 1. **`path` (string)** — `push` only
    Repository subdirectory the push action acts. If omitted, it will run at the repository root.

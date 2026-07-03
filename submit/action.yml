@@ -58,7 +58,7 @@ runs:
       run: |
         curvenote sub publish ${{ inputs.venue }} -d
     - name: Upload Curvenote Logs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: submit-${{ inputs.id }}
         path: ${{ inputs.working-directory }}/_build/logs

@@ -14,7 +14,7 @@ jobs:
       version: ${{ steps.get-version.outputs.version }}
       release: ${{ steps.validate.outputs.release }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Fetches all tags
       - name: Determine version from package.json
@@ -40,12 +40,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: prepare
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Fine-grained PAT with contents:write and workflows:write scopes
           token: ${{ secrets.WORKFLOW_TOKEN }}
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 18
           cache: 'npm'
@@ -53,22 +53,33 @@ jobs:
         run: |
           git checkout -b release/latest
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push CLI image
-        uses: docker/build-push-action@v6
+      - name: Build and push full CLI image
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/Dockerfile
+          target: full
           push: true
           tags: |
             ghcr.io/curvenote/actions/cli:main
             ghcr.io/curvenote/actions/cli:latest
+      - name: Build and push slim CLI image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: slim
+          push: true
+          tags: |
+            ghcr.io/curvenote/actions/cli:main-slim
+            ghcr.io/curvenote/actions/cli:latest-slim
       - name: Stamp latest into workflows
         run: |
           sed -i s/@main/@latest/g .github/workflows/publish.yml
@@ -106,13 +117,13 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.release == 'yes'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # Fine-grained PAT with contents:write and workflows:write scopes
           token: ${{ secrets.WORKFLOW_TOKEN }}
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 18
           cache: 'npm'
@@ -120,27 +131,53 @@ jobs:
         run: |
           git checkout -b release/${{ needs.prepare.outputs.version }}
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push CLI image
-        uses: docker/build-push-action@v6
+      - name: Resolve image tags
+        id: image-tags
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          MINOR=$(echo "$VERSION" | cut -d. -f1-2)
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          echo "major=${MAJOR}" >> "$GITHUB_OUTPUT"
+          {
+            echo "full<<EOF"
+            echo "ghcr.io/curvenote/actions/cli:${VERSION}"
+            echo "ghcr.io/curvenote/actions/cli:${MINOR}"
+            echo "ghcr.io/curvenote/actions/cli:${MAJOR}"
+            echo "ghcr.io/curvenote/actions/cli:latest"
+            echo "EOF"
+            echo "slim<<EOF"
+            echo "ghcr.io/curvenote/actions/cli:${VERSION}-slim"
+            echo "ghcr.io/curvenote/actions/cli:${MINOR}-slim"
+            echo "ghcr.io/curvenote/actions/cli:${MAJOR}-slim"
+            echo "ghcr.io/curvenote/actions/cli:latest-slim"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Build and push full CLI image
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/Dockerfile
+          target: full
           push: true
-          tags: |
-            ghcr.io/curvenote/actions/cli:${{ needs.prepare.outputs.version }}
-            ghcr.io/curvenote/actions/cli:$(echo ${{ needs.prepare.outputs.version }} | cut -d. -f1-2)
-            ghcr.io/curvenote/actions/cli:$(echo ${{ needs.prepare.outputs.version }} | cut -d. -f1)
-            ghcr.io/curvenote/actions/cli:latest
+          tags: ${{ steps.image-tags.outputs.full }}
+      - name: Build and push slim CLI image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: slim
+          push: true
+          tags: ${{ steps.image-tags.outputs.slim }}
       - name: Stamp version into workflows
         run: |
-          MAJOR=$(echo ${{ needs.prepare.outputs.version }} | cut -d. -f1)
+          MAJOR="${{ steps.image-tags.outputs.major }}"
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/publish.yml
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/draft.yml
           sed -i s/@main/@${{ needs.prepare.outputs.version }}/g .github/workflows/submit.yml

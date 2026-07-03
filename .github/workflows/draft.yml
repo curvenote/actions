@@ -102,22 +102,22 @@ on:
         type: boolean
       typst:
         description: |
-          Deprecated. Typst is always available in the workflow container image.
-          This input is accepted for compatibility and has no effect.
+          When true (default), use the full CLI image with Typst and fonts.
+          Set typst and images both to false to use the smaller slim image.
         required: false
         default: 'true'
         type: string
       fonts:
         description: |
-          Deprecated. Fonts are always available in the workflow container image.
-          This input is accepted for compatibility and has no effect.
+          Debian package name(s) for fonts used with Typst PDF builds (only when typst is true).
+          fonts-noto is included in the full image; other packages are installed at runtime.
         required: false
         default: 'fonts-noto'
         type: string
       images:
         description: |
-          Deprecated. Image tools are always available in the workflow container image.
-          This input is accepted for compatibility and has no effect.
+          When true (default), use the full CLI image with image conversion tools.
+          Set typst and images both to false to use the smaller slim image.
         required: false
         default: 'true'
         type: string
@@ -136,13 +136,15 @@ jobs:
       preview: ${{ steps.build-strategy.outputs.preview }}
       matrix: ${{ steps.build-strategy.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
           fetch-depth: 1
+          # Required for pull_request_target journal monorepos that checkout fork PR heads.
+          allow-unsafe-pr-checkout: true
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@0b975f61488402a699abcebd6a1e25924cf85218
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96
         with:
           separator: ','
       - id: build-strategy
@@ -161,7 +163,7 @@ jobs:
     needs: strategy
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/curvenote/actions/cli:main
+      image: ${{ (inputs.typst == 'true' || inputs.images == 'true') && 'ghcr.io/curvenote/actions/cli:main' || 'ghcr.io/curvenote/actions/cli:main-slim' }}
     concurrency:
       group: draft-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}-${{ matrix.working-directory }}
       cancel-in-progress: true
@@ -170,10 +172,17 @@ jobs:
       fail-fast: false
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
           fetch-depth: 1
+          # Required for pull_request_target journal monorepos that checkout fork PR heads.
+          allow-unsafe-pr-checkout: true
+      - name: Install custom fonts
+        if: ${{ inputs.typst == 'true' && inputs.fonts != 'fonts-noto' }}
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ${{ inputs.fonts }}
       - uses: curvenote/actions/submit@main
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
@@ -189,16 +198,23 @@ jobs:
     needs: strategy
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/curvenote/actions/cli:main
+      image: ${{ (inputs.typst == 'true' || inputs.images == 'true') && 'ghcr.io/curvenote/actions/cli:main' || 'ghcr.io/curvenote/actions/cli:main-slim' }}
     if: ${{ toJson(fromJson(needs.strategy.outputs.matrix).include) != '[]' && needs.strategy.outputs.check == 'true'}}
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
           fetch-depth: 1
+          # Required for pull_request_target journal monorepos that checkout fork PR heads.
+          allow-unsafe-pr-checkout: true
+      - name: Install custom fonts
+        if: ${{ inputs.typst == 'true' && inputs.fonts != 'fonts-noto' }}
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ${{ inputs.fonts }}
       # Note, the collection shouldn't be necessary:
       - name: Run curvenote check
         run: |
