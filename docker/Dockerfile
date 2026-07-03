@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     imagemagick \
     inkscape \
     webp \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Allow PDF -> PNG conversions via ImageMagick.
