@@ -189,6 +189,8 @@ jobs:
           fetch-depth: 1
           # Required for pull_request_target journal monorepos that checkout fork PR heads.
           allow-unsafe-pr-checkout: true
+      - name: Update Curvenote CLI
+        run: npm install -g curvenote@latest
       - name: Install custom fonts
         if: ${{ inputs.typst == 'true' && inputs.fonts != 'fonts-noto' }}
         run: |
@@ -227,6 +229,8 @@ jobs:
           fetch-depth: 1
           # Required for pull_request_target journal monorepos that checkout fork PR heads.
           allow-unsafe-pr-checkout: true
+      - name: Update Curvenote CLI
+        run: npm install -g curvenote@latest
       - name: Install custom fonts
         if: ${{ inputs.typst == 'true' && inputs.fonts != 'fonts-noto' }}
         run: |

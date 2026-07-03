@@ -47,7 +47,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 18
+          node-version: 24
           cache: 'npm'
       - name: Checkout temporary branch
         run: |
@@ -125,7 +125,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 18
+          node-version: 24
           cache: 'npm'
       - name: Checkout temporary branch
         run: |
@@ -150,13 +150,11 @@ jobs:
             echo "ghcr.io/curvenote/actions/cli:${VERSION}"
             echo "ghcr.io/curvenote/actions/cli:${MINOR}"
             echo "ghcr.io/curvenote/actions/cli:${MAJOR}"
-            echo "ghcr.io/curvenote/actions/cli:latest"
             echo "EOF"
             echo "slim<<EOF"
             echo "ghcr.io/curvenote/actions/cli:${VERSION}-slim"
             echo "ghcr.io/curvenote/actions/cli:${MINOR}-slim"
             echo "ghcr.io/curvenote/actions/cli:${MAJOR}-slim"
-            echo "ghcr.io/curvenote/actions/cli:latest-slim"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
       - name: Build and push full CLI image

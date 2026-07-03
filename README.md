@@ -234,6 +234,8 @@ These optional inputs may be used with the `draft`, `submit`, or `push` actions.
 1. **`typst` / `images` (string)**
    Select the CLI container image. When either is `true` (the default), jobs use the full image with Typst, fonts, and image tools. Set both to `false` to use the smaller slim image (Curvenote CLI only).
 
+   Typst is fixed to the version that was current when the action image was published (latest-at-release), not reinstalled each run.
+
 1. **`fonts` (string)**
    Debian package name(s) for fonts used with Typst PDF builds (only when `typst` is `true`). Default is `fonts-noto`, which is included in the full image. Any other value is installed with `apt-get` at runtime.
 

@@ -47,6 +47,8 @@ jobs:
       image: ${{ (inputs.typst == 'true' || inputs.images == 'true') && 'ghcr.io/curvenote/actions/cli:main' || 'ghcr.io/curvenote/actions/cli:main-slim' }}
     steps:
       - uses: actions/checkout@v7
+      - name: Update Curvenote CLI
+        run: npm install -g curvenote@latest
       - name: Install custom fonts
         if: ${{ inputs.typst == 'true' && inputs.fonts != 'fonts-noto' }}
         run: |

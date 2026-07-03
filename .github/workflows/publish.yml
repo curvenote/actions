@@ -154,6 +154,8 @@ jobs:
           fetch-depth: 1
           # Required for pull_request_target journal monorepos that checkout fork PR heads.
           allow-unsafe-pr-checkout: true
+      - name: Update Curvenote CLI
+        run: npm install -g curvenote@latest
       - uses: curvenote/actions/submit@main
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
@@ -179,6 +181,8 @@ jobs:
           fetch-depth: 1
           # Required for pull_request_target journal monorepos that checkout fork PR heads.
           allow-unsafe-pr-checkout: true
+      - name: Update Curvenote CLI
+        run: npm install -g curvenote@latest
       # Note, the collection shouldn't be necessary:
       - run: |
           if [ -n "${{ inputs.collection }}" ]; then
