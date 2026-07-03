@@ -100,6 +100,27 @@ on:
           without write permissions.
         default: true
         type: boolean
+      typst:
+        description: |
+          Deprecated. Typst is always available in the workflow container image.
+          This input is accepted for compatibility and has no effect.
+        required: false
+        default: 'true'
+        type: string
+      fonts:
+        description: |
+          Deprecated. Fonts are always available in the workflow container image.
+          This input is accepted for compatibility and has no effect.
+        required: false
+        default: 'fonts-noto'
+        type: string
+      images:
+        description: |
+          Deprecated. Image tools are always available in the workflow container image.
+          This input is accepted for compatibility and has no effect.
+        required: false
+        default: 'true'
+        type: string
     secrets:
       GITHUB:
         description: GitHub API token (usually `env.GITHUB_TOKEN`)

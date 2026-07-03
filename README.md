@@ -231,6 +231,9 @@ These optional inputs may be used with the `draft`, `submit`, or `push` actions.
 1. **`debug` (string)**
    Set to `true` to run Curvenote commands with debug logging for easier troubleshooting. Default is `false`.
 
+1. **`typst` / `fonts` / `images` (string)** — deprecated
+   Accepted for compatibility with existing workflows. These have no effect; Typst, fonts, and image tools are always available in the workflow container image.
+
 1. **`path` (string)** — `push` only
    Repository subdirectory the push action acts. If omitted, it will run at the repository root.
 
