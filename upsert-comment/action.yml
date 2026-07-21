@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Find PR Comment
       if: ${{ github.event.pull_request.number }}
-      uses: peter-evans/find-comment@60c57613a233a2143853d3f68874167868b5d040
+      uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad
       id: fc
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -24,7 +24,7 @@ runs:
         body-includes: ${{ inputs.title }}
     - name: Find "no submissions" PR Comment
       if: ${{ github.event.pull_request.number }}
-      uses: peter-evans/find-comment@60c57613a233a2143853d3f68874167868b5d040
+      uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad
       id: fc-no-subs
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -32,7 +32,7 @@ runs:
         body-includes: No submissions available to inspect.
     - name: Find "stale" PR Comment
       if: ${{ github.event.pull_request.number }}
-      uses: peter-evans/find-comment@60c57613a233a2143853d3f68874167868b5d040
+      uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad
       id: fc-stale
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -42,7 +42,7 @@ runs:
     # If no comment exists at all, make a new comment.
     - name: Create new PR comment
       if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id == '' }}
-      uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
@@ -52,7 +52,7 @@ runs:
     # If the new comment is "success" (i.e. not "no submission available"), replace the previous comment
     - name: Update PR comment
       if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id != '' && !contains(inputs.comment, 'No submissions available to inspect.') }}
-      uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         edit-mode: replace
@@ -67,7 +67,7 @@ runs:
     # Then: append the "stale" message to the existing comment.
     - name: Append "stale" message to existing "successful" comment
       if: ${{ github.event.pull_request.number && steps.fc.outputs.comment-id != '' && steps.fc-no-subs.outputs.comment-id == '' && steps.fc-stale.outputs.comment-id == '' && contains(inputs.comment, 'No submissions available to inspect.') }}
-      uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         edit-mode: replace
@@ -77,7 +77,7 @@ runs:
           🚧 These previews are stale and may not reflect the current state of this PR. 🚧
     - name: Create Commit comment
       if: ${{ !github.event.pull_request.number }}
-      uses: peter-evans/commit-comment@1d732d08f4ceed8b5960ae40d4206620a3b8d38f
+      uses: peter-evans/commit-comment@f6d60c65d05bb59f750fa51ad3de1d443ba0eb52
       with:
         body: |
           **${{ inputs.title }}**

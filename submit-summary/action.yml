@@ -9,7 +9,7 @@ inputs:
     description: The build matrix created in the strategy step (JSON)
     required: true
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
 outputs:
   comment:
