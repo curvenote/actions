@@ -12,17 +12,23 @@ on:
         default: 'false'
         type: string
       typst:
-        description: Install typst for PDF rendering
+        description: |
+          When true (default), use the full CLI image with Typst and fonts.
+          Set typst and images both to false to use the smaller slim image.
         required: false
         default: 'true'
         type: string
       fonts:
-        description: Fonts to install for typst PDF builds
+        description: |
+          Debian package name(s) for fonts used with Typst PDF builds (only when typst is true).
+          fonts-noto is included in the full image; other packages are installed at runtime.
         required: false
         default: 'fonts-noto'
         type: string
       images:
-        description: Install image transformation tools
+        description: |
+          When true (default), use the full CLI image with image conversion tools.
+          Set typst and images both to false to use the smaller slim image.
         required: false
         default: 'true'
         type: string
@@ -37,13 +43,15 @@ on:
 jobs:
   push:
     runs-on: ubuntu-latest
+    container:
+      image: ${{ (inputs.typst == 'true' || inputs.images == 'true') && 'ghcr.io/curvenote/cli:latest' || 'ghcr.io/curvenote/cli:latest-slim' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: curvenote/actions/setup@main
-        with:
-          typst: ${{ inputs.typst }}
-          fonts: ${{ inputs.fonts }}
-          images: ${{ inputs.images }}
+      - uses: actions/checkout@v7
+      - name: Install custom fonts
+        if: ${{ inputs.typst == 'true' && inputs.fonts != 'fonts-noto' }}
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ${{ inputs.fonts }}
       - name: Run Curvenote Push (private)
         if: ${{ inputs.landing-content == '' }}
         shell: bash

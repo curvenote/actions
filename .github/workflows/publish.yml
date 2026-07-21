@@ -113,13 +113,15 @@ jobs:
       preview: ${{ steps.build-strategy.outputs.preview }}
       matrix: ${{ steps.build-strategy.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 1
+          # Required for pull_request_target journal monorepos that checkout fork PR heads.
+          allow-unsafe-pr-checkout: true
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@0b975f61488402a699abcebd6a1e25924cf85218
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96
         with:
           separator: ','
       - id: build-strategy
@@ -137,6 +139,8 @@ jobs:
   preview:
     needs: strategy
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/curvenote/cli:latest
     concurrency:
       group: preview-${{ github.event.pull_request.head.repo.full_name }}-${{ github.head_ref }}
       cancel-in-progress: true
@@ -144,11 +148,12 @@ jobs:
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 1
-      - uses: curvenote/actions/setup@main
+          # Required for pull_request_target journal monorepos that checkout fork PR heads.
+          allow-unsafe-pr-checkout: true
       - uses: curvenote/actions/submit@main
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
@@ -162,18 +167,18 @@ jobs:
   check:
     needs: strategy
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/curvenote/cli:latest-slim
     if: ${{ needs.strategy.outputs.check == 'true'}}
     strategy:
       matrix: ${{fromJson(needs.strategy.outputs.matrix)}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 1
-      - uses: curvenote/actions/setup@main
-        with:
-          typst: false
-          images: false
+          # Required for pull_request_target journal monorepos that checkout fork PR heads.
+          allow-unsafe-pr-checkout: true
       # Note, the collection shouldn't be necessary:
       - run: |
           if [ -n "${{ inputs.collection }}" ]; then

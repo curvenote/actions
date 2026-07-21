@@ -226,19 +226,18 @@ jobs:
 
 # Additional Options
 
-These optional inputs may be used with the `draft`, `submit`, or `push` actions. They are passed through to the setup step or Curvenote CLI as described for each option below.
+These optional inputs may be used with the `draft`, `submit`, or `push` actions.
 
 1. **`debug` (string)**
    Set to `true` to run Curvenote commands with debug logging for easier troubleshooting. Default is `false`.
 
-1. **`typst` (string)**
-   When `true`, installs [Typst](https://typst.app) for PDF rendering in the setup step. Set to `false` to skip Typst and font installation. Default is `true`.
+1. **`typst` / `images` (string)**
+   Select the CLI container image (`ghcr.io/curvenote/cli`). When either is `true` (the default), jobs use the full image with Typst, fonts, and image tools. Set both to `false` to use the smaller slim image (Curvenote CLI only).
+
+   Images are published with the Curvenote CLI release, so CLI bugfixes are available without a new action release. Typst is fixed to the version that was current when that CLI image was built.
 
 1. **`fonts` (string)**
-   Debian package name(s) passed to `apt-get install` for fonts used with Typst PDF builds (only when `typst` is `true`). Default is `fonts-noto`.
-
-1. **`images` (string)**
-   When `true`, installs image conversion tooling (for example Inkscape and ImageMagick) used by the build. Set to `false` to skip. Default is `true`.
+   Debian package name(s) for fonts used with Typst PDF builds (only when `typst` is `true`). Default is `fonts-noto`, which is included in the full image. Any other value is installed with `apt-get` at runtime.
 
 1. **`path` (string)** — `push` only
    Repository subdirectory the push action acts. If omitted, it will run at the repository root.
