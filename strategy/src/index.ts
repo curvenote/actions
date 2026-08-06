@@ -7,6 +7,7 @@ import {
   filterPathsAndIdentifyUnknownChanges,
   getIdsFromPaths,
   hasIntersection,
+  readChangedFiles,
   resolvePaths,
 } from './utils.js';
 
@@ -31,7 +32,7 @@ import {
   const submitLabel = booleanOrLabels(core.getInput('submit-label'));
   const idPatternRegex = core.getInput('id-pattern-regex');
 
-  const changedFiles = core.getInput('changed-files').split(',');
+  const changedFiles = readChangedFiles(core.getInput('changed-files-json'));
   const prLabels = await getPullRequestLabels(octokit);
   const rawEnforceSingleFolder = booleanOrLabels(core.getInput('enforce-single-folder'));
   const enforceSingleFolder =

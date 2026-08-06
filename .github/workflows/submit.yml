@@ -160,13 +160,16 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96
         with:
-          separator: ','
+          json: 'true'
+          write_output_files: 'true'
+          safe_output: 'false'
+          output_dir: ${{ runner.temp }}/changed-files
       - id: build-strategy
         uses: curvenote/actions/strategy@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB }}
         with:
-          changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
+          changed-files-json: ${{ runner.temp }}/changed-files/all_changed_files.json
           path: ${{ inputs.path }}
           exclude: ${{ inputs.exclude }}
           enforce-single-folder: ${{ inputs.enforce-single-folder }}
