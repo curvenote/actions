@@ -5,6 +5,9 @@ import * as path from 'path';
 
 type Report = { status: 'pass' | 'fail'; optional?: boolean }[];
 
+// Must match the artifact name uploaded by the `submit` action.
+const ARTIFACT_PREFIX = 'submit-';
+
 function formatDateUTC(date: string): string {
   // for example: Mar 12, 2024, 11:36 AM
   if (!date) return '';
@@ -53,8 +56,14 @@ function reportSummaryMessage(report: Report | undefined, buildUrl: string) {
     include: { id: string; 'working-directory': string }[];
   };
 
+  // Only keep the artifacts that belong to this job's matrix.
+  const infoByArtifact = new Map(
+    matrix.include.map((info) => [`${ARTIFACT_PREFIX}${info.id}`, info]),
+  );
+  const artifacts = list.artifacts.filter(({ name }) => infoByArtifact.has(name));
+
   await Promise.all(
-    list.artifacts.map((a) =>
+    artifacts.map((a) =>
       artifact.downloadArtifact(a.id, {
         path: `logs/${a.name}`,
       }),
@@ -70,8 +79,9 @@ function reportSummaryMessage(report: Report | undefined, buildUrl: string) {
     .map((dir) => {
       const name = path.join('logs', dir, 'curvenote.submit.json');
       if (!fs.existsSync(name)) return null;
+      const info = infoByArtifact.get(dir);
+      if (!info) return null;
       const data = JSON.parse(fs.readFileSync(name).toString());
-      const info = matrix.include.find(({ id }) => id === dir.replace('submit-', ''));
       return { dir, data, info };
     })
     .filter(
@@ -83,6 +93,11 @@ function reportSummaryMessage(report: Report | undefined, buildUrl: string) {
         info: { id: string; 'working-directory': string };
       } => !!log,
     );
+  if (submitLogs.length === 0) {
+    // upsert-comment is dependent on the text of this comment; if you change it here, also change it there.
+    core.setOutput('comment', '📭 No submissions available to inspect.');
+    return;
+  }
 
   const table = `
 | Directory | Preview | Checks | Updated (UTC) |
