@@ -5,11 +5,19 @@ branding:
   icon: package
   color: blue
 inputs:
-  changed-files:
+  changed-files-json:
     description: |
-      A comma-separated list of changed files.
+      Path to a JSON file containing an array of the changed file paths.
 
-      We recommend using https://github.com/tj-actions/changed-files
+      This is read from a file, rather than passed directly, as the list of changed
+      files can exceed the maximum size of an action input.
+
+      We recommend using https://github.com/tj-actions/changed-files with
+      `json: true`, `write_output_files: true` and `safe_output: false`, which
+      writes `all_changed_files.json` to its `output_dir`. We do not need safe output
+      as the list is read from a file, never interpolated into a shell, and
+      sanitizing it mangles paths with non-ASCII or special characters.
+          
     required: true
   monorepo:
     description: |
