@@ -163,7 +163,7 @@ jobs:
           safe_output: 'false'
           output_dir: ${{ runner.temp }}/changed-files
       - id: build-strategy
-        uses: curvenote/actions/strategy@main
+        uses: curvenote/actions/strategy@PR56
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB }}
         with:
@@ -198,7 +198,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends ${{ inputs.fonts }}
-      - uses: curvenote/actions/submit@main
+      - uses: curvenote/actions/submit@PR56
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         with:
@@ -253,12 +253,12 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
     steps:
-      - uses: curvenote/actions/submit-summary@main
+      - uses: curvenote/actions/submit-summary@PR56
         id: summary
         with:
           matrix: '${{ needs.strategy.outputs.matrix }}'
       - if: ${{ inputs.comment }}
-        uses: curvenote/actions/upsert-comment@main
+        uses: curvenote/actions/upsert-comment@PR56
         with:
           title: ${{ inputs.comment-title }}
           comment: '${{ steps.summary.outputs.comment }}'
