@@ -242,3 +242,28 @@ These optional inputs may be used with the `draft`, `submit`, or `push` actions.
 1. **`path` (string)** — `push` only
    Repository subdirectory the push action acts. If omitted, it will run at the repository root.
 
+1. **`comment-title` (string)** — `draft` and `submit` only
+   The title of the summary comment, shown in bold at the top. The title also identifies the comment, so that later runs update it in place rather than adding a new one. Default is `Curvenote Preview`.
+
+   You only need to set this if a single workflow file calls the `draft` or `submit` workflow more than once — for example, to submit two different kinds of content from separate directories. Each of those jobs comments on the same pull request, so unless they are given distinct titles they will find and overwrite each other's comment:
+
+   ```yaml
+   jobs:
+     journal-draft:
+       uses: curvenote/actions/.github/workflows/draft.yml@v1
+       with:
+         kind: article
+         path: journal-submissions/*
+         comment-title: Curvenote Preview (journal)
+         # ...
+     group-draft:
+       uses: curvenote/actions/.github/workflows/draft.yml@v1
+       with:
+         kind: example
+         path: group-submissions/*
+         comment-title: Curvenote Preview (group)
+         # ...
+   ```
+
+   Comments are matched by searching for the title within the comment body, so no title may be a prefix of another. Give every job a distinct suffix, as above — do not leave one job on the default `Curvenote Preview` while another uses `Curvenote Preview (group)`, since the default would also match the second comment.
+

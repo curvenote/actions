@@ -70,10 +70,44 @@ export async function resolvePaths(baseDir: string, pattern: string): Promise<st
  *
  * pathStartsWith('papers/my-paper.md', 'pa') returns false
  *
+ * The '.' base path is the repository root, which contains every path.
  */
 function pathStartsWith(fullPath: string, basePath: string) {
+  if (basePath === '.') return true;
   const fullSliced = fullPath.split('/').slice(0, basePath.split('/').length).join('/');
   return fullSliced === basePath;
+}
+
+/**
+ * Read the list of changed files from a JSON file.
+ *
+ * The changed files are read from a file, rather than passed in directly, as the list
+ * can exceed the maximum size of an action input. See `tj-actions/changed-files` with
+ * `json: true` and `write_output_files: true`.
+ *
+ * @param changedFilesJson Path to a JSON file containing an array of file paths
+ */
+export function readChangedFiles(changedFilesJson: string): string[] {
+  if (!changedFilesJson) {
+    throw new Error('No changed-files-json path was provided to the strategy action');
+  }
+  if (!fs.existsSync(changedFilesJson)) {
+    throw new Error(
+      `There is no changed files JSON file at "${changedFilesJson}"\nEnsure the changed files step runs in the same job with \`json: true\` and \`write_output_files: true\``,
+    );
+  }
+  let changedFiles: unknown;
+  try {
+    changedFiles = JSON.parse(fs.readFileSync(changedFilesJson).toString());
+  } catch {
+    throw new Error(`Unable to parse the changed files JSON file at "${changedFilesJson}"`);
+  }
+  if (!Array.isArray(changedFiles) || changedFiles.some((file) => typeof file !== 'string')) {
+    throw new Error(
+      `Expected an array of file paths in the changed files JSON file at "${changedFilesJson}"`,
+    );
+  }
+  return changedFiles as string[];
 }
 
 /**
@@ -101,13 +135,11 @@ export function filterPathsAndIdentifyUnknownChanges(
     return { filteredPaths: allowedPaths, unknownChangedFiles };
   }
   // Extract base paths from changedFiles
-  const changedPaths = changedFiles
-    .map((file) => {
-      const parts = file.split('/');
-      parts.pop(); // Remove the file name, keep the directory path
-      return parts.join('/'); // Rejoin to form the base path
-    })
-    .filter((p) => !!p);
+  const changedPaths = changedFiles.map((file) => {
+    const parts = file.split('/');
+    parts.pop(); // Remove the file name, keep the directory path
+    return parts.join('/') || '.'; // Files at the root of the repository are in '.'
+  });
 
   // Deduplicate changedPaths
   const uniqueChangedPaths = Array.from(new Set(changedPaths));
@@ -116,10 +148,6 @@ export function filterPathsAndIdentifyUnknownChanges(
   const filteredPaths = allowedPaths.filter((allowed) => {
     return uniqueChangedPaths.some((changed) => pathStartsWith(changed, allowed));
   });
-  // If '.' path is allowed, all changes are valid
-  if (allowedPaths.includes('.')) {
-    return { filteredPaths: [...filteredPaths, '.'], unknownChangedFiles: [] };
-  }
   return { filteredPaths, unknownChangedFiles };
 }
 

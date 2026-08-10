@@ -8,6 +8,7 @@ import {
   filterPathsAndIdentifyUnknownChanges,
   getIdsFromPaths,
   ensureUniqueAndValidIds,
+  readChangedFiles,
 } from './utils.js';
 
 vi.mock('fs', () => memfs.fs);
@@ -45,6 +46,54 @@ describe('utility tests', () => {
     ]);
     expect(await resolvePaths('posters', '*')).toEqual(['posters/poster-1', 'posters/poster-2']);
     expect(await resolvePaths('posters', '*')).toEqual(['posters/poster-1', 'posters/poster-2']);
+  });
+
+  it('readChangedFiles', () => {
+    memfs.vol.fromJSON({
+      '/tmp/outputs/all_changed_files.json': '["posters/poster-1/temp.tex","README.md"]',
+    });
+    expect(readChangedFiles('/tmp/outputs/all_changed_files.json')).toEqual([
+      'posters/poster-1/temp.tex',
+      'README.md',
+    ]);
+  });
+
+  it('readChangedFiles - unescaped special characters', () => {
+    // `safe_output: false` keeps paths with special/non-ASCII characters intact
+    memfs.vol.fromJSON({
+      '/tmp/outputs/all_changed_files.json': '["posters/café/figure (1).png"]',
+    });
+    expect(readChangedFiles('/tmp/outputs/all_changed_files.json')).toEqual([
+      'posters/café/figure (1).png',
+    ]);
+  });
+
+  it('readChangedFiles - empty list', () => {
+    memfs.vol.fromJSON({ '/tmp/outputs/all_changed_files.json': '[]' });
+    expect(readChangedFiles('/tmp/outputs/all_changed_files.json')).toEqual([]);
+  });
+
+  it.each([
+    ['no path', '', {}],
+    ['missing file', '/tmp/outputs/all_changed_files.json', {}],
+    [
+      'invalid json',
+      '/tmp/outputs/all_changed_files.json',
+      { '/tmp/outputs/all_changed_files.json': 'posters/poster-1/temp.tex' },
+    ],
+    [
+      'not an array',
+      '/tmp/outputs/all_changed_files.json',
+      { '/tmp/outputs/all_changed_files.json': '{"file":"temp.tex"}' },
+    ],
+    [
+      'not an array of strings',
+      '/tmp/outputs/all_changed_files.json',
+      { '/tmp/outputs/all_changed_files.json': '[{"file":"temp.tex"}]' },
+    ],
+  ])('readChangedFiles - %s throws', (_, changedFilesJson, files) => {
+    memfs.vol.fromJSON(files);
+    expect(() => readChangedFiles(changedFilesJson)).toThrow();
   });
 
   it('filterPathsAndIdentifyUnknownChanges - select correct path', () => {
@@ -133,6 +182,43 @@ describe('utility tests', () => {
     ).toEqual({
       filteredPaths: ['.'],
       unknownChangedFiles: [],
+    });
+  });
+  it('filterPathsAndIdentifyUnknownChanges - path . matches changes at the repository root', () => {
+    expect(filterPathsAndIdentifyUnknownChanges(['.'], ['README.md'])).toEqual({
+      filteredPaths: ['.'],
+      unknownChangedFiles: [],
+    });
+  });
+  it('filterPathsAndIdentifyUnknownChanges - path . allows all changes when unchanged included', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(['.'], ['posters/temp.tex', '.git/temp.bin'], true),
+    ).toEqual({
+      filteredPaths: ['.'],
+      unknownChangedFiles: [],
+    });
+  });
+  it('filterPathsAndIdentifyUnknownChanges - path . alongside other allowed paths', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(
+        ['.', 'posters/poster-1'],
+        ['posters/poster-1/temp.tex', '.git/temp.bin'],
+      ),
+    ).toEqual({
+      filteredPaths: ['.', 'posters/poster-1'],
+      unknownChangedFiles: [],
+    });
+  });
+  it('filterPathsAndIdentifyUnknownChanges - includeUnchanged returns all allowed paths', () => {
+    expect(
+      filterPathsAndIdentifyUnknownChanges(
+        ['posters/poster-1', 'posters/poster-2'],
+        ['posters/poster-1/temp.tex', '.git/temp.bin'],
+        true,
+      ),
+    ).toEqual({
+      filteredPaths: ['posters/poster-1', 'posters/poster-2'],
+      unknownChangedFiles: ['.git/temp.bin'],
     });
   });
 
