@@ -49,12 +49,43 @@ function reportSummaryMessage(report: Report | undefined, buildUrl: string) {
   return `❌ [${summary.pass}/${total} checks passed${summary.optional ? ` (${summary.optional} optional)` : ''}](${buildUrl}#checks)`;
 }
 
+type Matrix = { include: { id: string; 'working-directory': string }[] };
+
+/**
+ * Parse the matrix input, which may be missing or empty.
+ *
+ * The summary job runs with `always()`, so it also runs when the strategy job failed
+ * (e.g. an invalid folder) and never set its `matrix` output. In that case the input
+ * is an empty string and there is nothing to summarize.
+ */
+function readMatrix(): Matrix | undefined {
+  const input = core.getInput('matrix')?.trim();
+  if (!input) return undefined;
+  let matrix: Matrix;
+  try {
+    matrix = JSON.parse(input);
+  } catch {
+    core.warning(`Unable to parse the matrix input as JSON: ${input}`);
+    return undefined;
+  }
+  if (!Array.isArray(matrix?.include)) {
+    core.warning(`The matrix input does not contain an "include" list: ${input}`);
+    return undefined;
+  }
+  return matrix;
+}
+
+// upsert-comment is dependent on the text of this comment; if you change it here, also change it there.
+const NO_SUBMISSIONS = '📭 No submissions available to inspect.';
+
 (async () => {
+  const matrix = readMatrix();
+  if (!matrix) {
+    core.setOutput('comment', NO_SUBMISSIONS);
+    return;
+  }
   const artifact = new DefaultArtifactClient();
   const list = await artifact.listArtifacts();
-  const matrix = JSON.parse(core.getInput('matrix')) as {
-    include: { id: string; 'working-directory': string }[];
-  };
 
   // Only keep the artifacts that belong to this job's matrix.
   const infoByArtifact = new Map(
@@ -70,8 +101,7 @@ function reportSummaryMessage(report: Report | undefined, buildUrl: string) {
     ),
   );
   if (!fs.existsSync('logs')) {
-    // upsert-comment is dependent on the text of this comment; if you change it here, also change it there.
-    core.setOutput('comment', '📭 No submissions available to inspect.');
+    core.setOutput('comment', NO_SUBMISSIONS);
     return;
   }
   const submitLogs = fs
@@ -94,8 +124,7 @@ function reportSummaryMessage(report: Report | undefined, buildUrl: string) {
       } => !!log,
     );
   if (submitLogs.length === 0) {
-    // upsert-comment is dependent on the text of this comment; if you change it here, also change it there.
-    core.setOutput('comment', '📭 No submissions available to inspect.');
+    core.setOutput('comment', NO_SUBMISSIONS);
     return;
   }
 

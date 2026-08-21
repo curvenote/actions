@@ -137,6 +137,16 @@ Since the journal must accept pull requests from forks, `pull_request_target` is
 
    For this example, specifying `path: submissions/*` means authors must fork the repository and create a unique subfolder inside `submissions/`.
 
+1. **`exclude` (string)** — `draft` and `submit` only
+   Folders to leave out of the workflow, defined in the same way as `path` — comma-separated, and optionally ending in `/*` to match every subfolder. Any folder matched by `exclude` is dropped from the set matched by `path`:
+
+   ```yaml
+   path: submissions/*
+   exclude: submissions/template, submissions/example
+   ```
+
+   Use this for folders that sit alongside real submissions but should never be checked, previewed or submitted — templates and examples, or a folder that does not satisfy `id-pattern-regex` and would otherwise fail the whole workflow at the strategy step.
+
 1. **`enforce-single-folder` (boolean)**
    When true, an error will be raised if a pull request is touching multiple different folders. It will also error if changes are made outside a folder described in `path`.
 
