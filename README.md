@@ -202,7 +202,7 @@ on:
   push:
     branches: ['main']
 jobs:
-  journal-draft:
+  build-and-push:
     uses: curvenote/actions/.github/workflows/push.yml@v1
     secrets:
       CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
@@ -216,7 +216,7 @@ on:
   push:
     branches: ['main']
 jobs:
-  journal-draft:
+  build-and-deploy:
     uses: curvenote/actions/.github/workflows/push.yml@v1
     with:
       landing-content: '<SITE-NAME>'
