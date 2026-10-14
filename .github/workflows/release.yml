@@ -81,7 +81,7 @@ jobs:
   release:
     name: Create Versioned Release
     runs-on: ubuntu-latest
-    needs: prepare
+    needs: [prepare, latest]
     if: needs.prepare.outputs.release == 'yes'
     steps:
       - uses: actions/checkout@v7
