@@ -208,6 +208,31 @@ jobs:
       CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
 ```
 
+If your work lives in a subdirectory, set `path`. The push then only runs when files under `path` changed in that commit, so unrelated changes elsewhere in the repository do not trigger a new version:
+
+```yaml
+name: curvenote push
+on:
+  push:
+    branches: ['main']
+jobs:
+  build-and-push:
+    uses: curvenote/actions/.github/workflows/push.yml@v1
+    with:
+      path: my-paper
+    secrets:
+      CURVENOTE: ${{ secrets.CURVENOTE_TOKEN }}
+```
+
+If the work also depends on files outside `path` (for example, images in a shared folder), set `force: true` to push on every run. You can also add a [`paths` filter](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore) to your own trigger to list exactly which folders should start a push; this skips the workflow run entirely rather than skipping the push job:
+
+```yaml
+on:
+  push:
+    branches: ['main']
+    paths: ['my-paper/**', 'shared-images/**']
+```
+
 You may also use this action to set the landing content for a Curvenote site. You must have admin privileges on the Site:
 
 ```yaml
@@ -240,7 +265,10 @@ These optional inputs may be used with the `draft`, `submit`, or `push` actions.
    Debian package name(s) for fonts used with Typst PDF builds (only when `typst` is `true`). Default is `fonts-noto`, which is included in the full image. Any other value is installed with `apt-get` at runtime.
 
 1. **`path` (string)** — `push` only
-   Repository subdirectory the push action acts. If omitted, it will run at the repository root.
+   Repository subdirectory the push action acts. If omitted, it will run at the repository root. When set, the push is skipped unless files under `path` changed.
+
+1. **`force` (string)** — `push` only
+   Set to `true` to push even when no files under `path` changed. Default is `false`. Has no effect when `path` is not set.
 
 1. **`comment-title` (string)** — `draft` and `submit` only
    The title of the summary comment, shown in bold at the top. The title also identifies the comment, so that later runs update it in place rather than adding a new one. Default is `Curvenote Preview`.
