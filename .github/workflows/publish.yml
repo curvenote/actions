@@ -140,7 +140,7 @@ jobs:
           safe_output: 'false'
           output_dir: ${{ runner.temp }}/changed-files
       - id: build-strategy
-        uses: curvenote/actions/strategy@main
+        uses: curvenote/actions/strategy@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB }}
         with:
@@ -169,7 +169,7 @@ jobs:
           fetch-depth: 1
           # Required for pull_request_target journal monorepos that checkout fork PR heads.
           allow-unsafe-pr-checkout: true
-      - uses: curvenote/actions/submit@main
+      - uses: curvenote/actions/submit@latest
         env:
           CURVENOTE_TOKEN: ${{ secrets.CURVENOTE }}
         with:
@@ -211,11 +211,11 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB }}
     steps:
-      - uses: curvenote/actions/submit-summary@main
+      - uses: curvenote/actions/submit-summary@latest
         id: summary
         with:
           matrix: '${{ needs.strategy.outputs.matrix }}'
-      - uses: curvenote/actions/upsert-comment@main
+      - uses: curvenote/actions/upsert-comment@latest
         with:
           title: ${{ inputs.comment-title }}
           comment: '${{ steps.summary.outputs.comment }}'
