@@ -33,15 +33,56 @@ on:
         default: 'true'
         type: string
       path:
-        description: Repository subdirectory with work content
+        description: |
+          Repository subdirectory with work content. When set, the push only runs
+          if files under this path changed (see `force`).
         required: false
+        type: string
+      force:
+        description: |
+          When true, push even if no files under `path` changed. Use this if the work
+          depends on files outside `path` (for example, shared images).
+        required: false
+        default: 'false'
         type: string
     secrets:
       CURVENOTE:
         description: Curvenote API token (usually `secrets.CURVENOTE_TOKEN`)
         required: true
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ inputs.path == '' || inputs.force == 'true' || steps.changed-files.outputs.any_changed == 'true' }}
+    steps:
+      - name: Normalize path
+        id: path
+        if: ${{ inputs.path != '' && inputs.force != 'true' }}
+        shell: bash
+        env:
+          INPUT_PATH: ${{ inputs.path }}
+        run: |
+          p="${INPUT_PATH#./}"
+          p="${p%/}"
+          if [ -z "$p" ] || [ "$p" = "." ]; then p="**"; else p="${p}/**"; fi
+          echo "pattern=${p}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v7
+        if: ${{ inputs.path != '' && inputs.force != 'true' }}
+        with:
+          fetch-depth: 1
+      - name: Get changed files
+        id: changed-files
+        if: ${{ inputs.path != '' && inputs.force != 'true' }}
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96
+        with:
+          files: ${{ steps.path.outputs.pattern }}
+      - name: Report skipped push
+        if: ${{ inputs.path != '' && inputs.force != 'true' && steps.changed-files.outputs.any_changed != 'true' }}
+        shell: bash
+        run: echo "::notice::No changes under '${{ inputs.path }}'; skipping push. Set 'force' to true to push anyway."
   push:
+    needs: changes
+    if: ${{ needs.changes.outputs.run == 'true' }}
     runs-on: ubuntu-latest
     container:
       image: ${{ (inputs.typst == 'true' || inputs.images == 'true') && 'ghcr.io/curvenote/cli:latest' || 'ghcr.io/curvenote/cli:latest-slim' }}
